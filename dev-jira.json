@@ -1,0 +1,183 @@
+{
+  "tasks": [
+    {
+      "id": "1704067200000",
+      "title": "Implement user authentication system",
+      "description": "Create a secure login and registration system with JWT tokens and password hashing. Include forgot password functionality and email verification.",
+      "tag": "blue",
+      "priority": "high",
+      "assignedUser": "User 1",
+      "submittedBy": "User 2",
+      "startDate": "2024-01-01",
+      "dueDate": "2024-01-15",
+      "column": "progress",
+      "createdAt": "2024-01-01T09:00:00.000Z",
+      "updatedAt": "2024-01-03T14:30:00.000Z",
+      "lifecycle": [
+        {
+          "id": "lc_1704067200001",
+          "timestamp": "2024-01-01T09:00:00.000Z",
+          "fromStatus": null,
+          "toStatus": "todo",
+          "updateType": "creation",
+          "comments": "Task created",
+          "updatedBy": "User 2"
+        },
+        {
+          "id": "lc_1704153600001",
+          "timestamp": "2024-01-02T10:00:00.000Z",
+          "fromStatus": "todo",
+          "toStatus": "progress",
+          "updateType": "progress",
+          "comments": "Started working on authentication backend",
+          "updatedBy": "User 1"
+        }
+      ]
+    },
+    {
+      "id": "1704153600000",
+      "title": "Fix login button styling",
+      "description": "The login button appears misaligned on mobile devices. Need to update CSS to ensure proper responsive design.",
+      "tag": "red",
+      "priority": "medium",
+      "assignedUser": "User 3",
+      "submittedBy": "User 4",
+      "startDate": "2024-01-02",
+      "dueDate": "2024-01-05",
+      "column": "review",
+      "createdAt": "2024-01-02T10:00:00.000Z",
+      "updatedAt": "2024-01-04T16:45:00.000Z",
+      "lifecycle": [
+        {
+          "id": "lc_1704153600002",
+          "timestamp": "2024-01-02T10:00:00.000Z",
+          "fromStatus": null,
+          "toStatus": "todo",
+          "updateType": "creation",
+          "comments": "Task created",
+          "updatedBy": "User 4"
+        },
+        {
+          "id": "lc_1704240000001",
+          "timestamp": "2024-01-03T11:30:00.000Z",
+          "fromStatus": "todo",
+          "toStatus": "progress",
+          "updateType": "progress",
+          "comments": "Started investigating the CSS issue",
+          "updatedBy": "User 3"
+        },
+        {
+          "id": "lc_1704326400001",
+          "timestamp": "2024-01-04T16:45:00.000Z",
+          "fromStatus": "progress",
+          "toStatus": "review",
+          "updateType": "review",
+          "comments": "Fixed the styling issue, ready for review",
+          "updatedBy": "User 3"
+        }
+      ]
+    },
+    {
+      "id": "1704240000000",
+      "title": "Design new dashboard layout",
+      "description": "Create wireframes and mockups for the new dashboard interface. Focus on user experience and data visualization.",
+      "tag": "purple",
+      "priority": "low",
+      "assignedUser": "User 5",
+      "submittedBy": "User 1",
+      "startDate": "2024-01-03",
+      "dueDate": "2024-01-20",
+      "column": "todo",
+      "createdAt": "2024-01-03T11:00:00.000Z",
+      "updatedAt": "2024-01-03T11:00:00.000Z",
+      "lifecycle": [
+        {
+          "id": "lc_1704240000002",
+          "timestamp": "2024-01-03T11:00:00.000Z",
+          "fromStatus": null,
+          "toStatus": "todo",
+          "updateType": "creation",
+          "comments": "Task created",
+          "updatedBy": "User 1"
+        }
+      ]
+    },
+    {
+      "id": "1704326400000",
+      "title": "Optimize database queries",
+      "description": "Review and optimize slow-running database queries to improve application performance. Add proper indexing where needed.",
+      "tag": "green",
+      "priority": "urgent",
+      "assignedUser": "User 2",
+      "submittedBy": "User 1",
+      "startDate": "2024-01-04",
+      "dueDate": "2024-01-08",
+      "column": "done",
+      "createdAt": "2024-01-04T08:00:00.000Z",
+      "updatedAt": "2024-01-07T17:30:00.000Z",
+      "lifecycle": [
+        {
+          "id": "lc_1704326400002",
+          "timestamp": "2024-01-04T08:00:00.000Z",
+          "fromStatus": null,
+          "toStatus": "todo",
+          "updateType": "creation",
+          "comments": "Task created",
+          "updatedBy": "User 1"
+        },
+        {
+          "id": "lc_1704412800001",
+          "timestamp": "2024-01-05T09:15:00.000Z",
+          "fromStatus": "todo",
+          "toStatus": "progress",
+          "updateType": "progress",
+          "comments": "Started analyzing query performance",
+          "updatedBy": "User 2"
+        },
+        {
+          "id": "lc_1704499200001",
+          "timestamp": "2024-01-06T14:20:00.000Z",
+          "fromStatus": "progress",
+          "toStatus": "review",
+          "updateType": "review",
+          "comments": "Completed optimization, added indexes, ready for testing",
+          "updatedBy": "User 2"
+        },
+        {
+          "id": "lc_1704585600001",
+          "timestamp": "2024-01-07T17:30:00.000Z",
+          "fromStatus": "review",
+          "toStatus": "done",
+          "updateType": "completion",
+          "comments": "Testing completed successfully, performance improved by 40%",
+          "updatedBy": "User 1"
+        }
+      ]
+    },
+    {
+      "id": "1704412800000",
+      "title": "Update documentation",
+      "description": "Update API documentation to reflect recent changes and add examples for new endpoints.",
+      "tag": "yellow",
+      "priority": "none",
+      "assignedUser": "User 4",
+      "submittedBy": "User 3",
+      "startDate": "2024-01-05",
+      "dueDate": "2024-01-12",
+      "column": "todo",
+      "createdAt": "2024-01-05T13:00:00.000Z",
+      "updatedAt": "2024-01-05T13:00:00.000Z",
+      "lifecycle": [
+        {
+          "id": "lc_1704412800002",
+          "timestamp": "2024-01-05T13:00:00.000Z",
+          "fromStatus": null,
+          "toStatus": "todo",
+          "updateType": "creation",
+          "comments": "Task created",
+          "updatedBy": "User 3"
+        }
+      ]
+    }
+  ]
+}
