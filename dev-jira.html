@@ -8,8 +8,8 @@
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <!-- ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
@@ -170,7 +170,7 @@
                     </div>
 
                     <!-- View Switching Slider -->
-                    <div class="rounded-xl border border-gray-200 p-6" x-data="{ activeView: 'kanban' }" x-init="$watch('activeView', value => { if (value === 'metrics') { setTimeout(() => updateMetrics(), 200); } })">
+                    <div class="rounded-xl border border-gray-200 p-6" x-data="{ activeView: 'kanban' }" x-init="$watch('activeView', value => { if (value === 'metrics') { setTimeout(() => updateMetrics(true), 200); } })">
                         <div class="border-b border-gray-200">
                             <nav class="-mb-px flex space-x-2 overflow-x-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar]:h-1.5">
                                 <button class="inline-flex items-center gap-2 border-b-2 px-2.5 py-2 text-sm font-medium transition-colors duration-200 ease-in-out" 
@@ -1008,7 +1008,7 @@
         let charts = {};
 
         // Function to update metrics
-        function updateMetrics() {
+        function updateMetrics(showNotifications = false) {
             try {
                 const tasks = getAllTasksFromDOM();
                 console.log('Updating metrics with', tasks.length, 'tasks');
@@ -1045,6 +1045,11 @@
                     if (document.getElementById('timelineChart')) {
                         updateTimelineChart([]);
                     }
+                    
+                    // Show message for no data only if notifications are enabled
+                    if (showNotifications) {
+                        showNotification('Info', 'No task data available for metrics visualization', 'message');
+                    }
                 } else {
                     // Update charts with actual data
                     if (document.getElementById('statusChart')) {
@@ -1061,6 +1066,11 @@
                     }
                     if (document.getElementById('timelineChart')) {
                         updateTimelineChart(tasks);
+                    }
+                    
+                    // Show success message for data loaded only if notifications are enabled
+                    if (showNotifications) {
+                        showNotification('Success', `Metrics updated successfully with ${tasks.length} tasks`, 'success');
                     }
                 }
             } catch (error) {
@@ -1108,6 +1118,7 @@
                 const statusCounts = {
                     'todo': 0,
                     'progress': 0,
+                    'review': 0,
                     'done': 0
                 };
 
@@ -1120,10 +1131,10 @@
                 window.statusChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['To Do', 'In Progress', 'Done'],
+                        labels: ['To Do', 'In Progress', 'Review', 'Done'],
                         datasets: [{
-                            data: [statusCounts.todo, statusCounts.progress, statusCounts.done],
-                            backgroundColor: ['#ff9800', '#2196f3', '#4caf50'],
+                            data: [statusCounts.todo, statusCounts.progress, statusCounts.review, statusCounts.done],
+                            backgroundColor: ['#ff9800', '#2196f3', '#9c27b0', '#4caf50'],
                             borderWidth: 0
                         }]
                     },
@@ -1193,9 +1204,11 @@
                 }
 
                 const priorityCounts = {
+                    'urgent': 0,
                     'high': 0,
                     'medium': 0,
-                    'low': 0
+                    'low': 0,
+                    'none': 0
                 };
 
                 tasks.forEach(task => {
@@ -1207,10 +1220,10 @@
                 window.priorityChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: ['High', 'Medium', 'Low'],
+                        labels: ['Urgent', 'High', 'Medium', 'Low', 'None'],
                         datasets: [{
-                            data: [priorityCounts.high, priorityCounts.medium, priorityCounts.low],
-                            backgroundColor: ['#f44336', '#ff9800', '#4caf50'],
+                            data: [priorityCounts.urgent, priorityCounts.high, priorityCounts.medium, priorityCounts.low, priorityCounts.none],
+                            backgroundColor: ['#d32f2f', '#f44336', '#ff9800', '#4caf50', '#9e9e9e'],
                             borderWidth: 0
                         }]
                     },
@@ -1277,11 +1290,18 @@
                 }
 
                 const tagCounts = {};
+                const tagNames = {
+                    'blue': 'New Development',
+                    'red': 'Bug',
+                    'purple': 'Design',
+                    'green': 'Enhancement',
+                    'yellow': 'Ad Hoc'
+                };
+                
                 tasks.forEach(task => {
-                    if (task.tags) {
-                        task.tags.forEach(tag => {
-                            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-                        });
+                    if (task.tag) {
+                        const tagName = tagNames[task.tag] || task.tag;
+                        tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
                     }
                 });
 
@@ -1367,8 +1387,8 @@
 
                 const assigneeCounts = {};
                 tasks.forEach(task => {
-                    if (task.assignee) {
-                        assigneeCounts[task.assignee] = (assigneeCounts[task.assignee] || 0) + 1;
+                    if (task.assignedUser) {
+                        assigneeCounts[task.assignedUser] = (assigneeCounts[task.assignedUser] || 0) + 1;
                     }
                 });
 
@@ -1516,8 +1536,14 @@
         updateTaskCounters = function() {
             originalUpdateTaskCounters();
             // Only update metrics if metrics view is active
-            if (document.querySelector('[x-data]').__x.$data.activeView === 'metrics') {
-            updateMetrics();
+            try {
+                const alpineElement = document.querySelector('[x-data]');
+                if (alpineElement && alpineElement.__x && alpineElement.__x.$data && alpineElement.__x.$data.activeView === 'metrics') {
+                    updateMetrics();
+                }
+            } catch (error) {
+                // Silently ignore Alpine.js access errors during initialization
+                console.debug('Alpine.js not ready for metrics update');
             }
         };
 
@@ -1525,8 +1551,14 @@
         updateTableView = function() {
             originalUpdateTableView();
             // Only update metrics if metrics view is active
-            if (document.querySelector('[x-data]').__x.$data.activeView === 'metrics') {
-            updateMetrics();
+            try {
+                const alpineElement = document.querySelector('[x-data]');
+                if (alpineElement && alpineElement.__x && alpineElement.__x.$data && alpineElement.__x.$data.activeView === 'metrics') {
+                    updateMetrics();
+                }
+            } catch (error) {
+                // Silently ignore Alpine.js access errors during initialization
+                console.debug('Alpine.js not ready for metrics update');
             }
         };
 
@@ -1534,15 +1566,20 @@
         document.addEventListener('click', function(e) {
             if (e.target.closest('button') && e.target.textContent.includes('Metrics')) {
         setTimeout(() => {
-            updateMetrics();
+            updateMetrics(true);
                 }, 100);
             }
         });
 
         // Also initialize metrics after initial data load
         setTimeout(() => {
-            if (document.querySelector('[x-data]').__x && document.querySelector('[x-data]').__x.$data.activeView === 'metrics') {
-                updateMetrics();
+            try {
+                const alpineElement = document.querySelector('[x-data]');
+                if (alpineElement && alpineElement.__x && alpineElement.__x.$data && alpineElement.__x.$data.activeView === 'metrics') {
+                    updateMetrics();
+                }
+            } catch (error) {
+                console.debug('Alpine.js not ready for initial metrics update');
             }
         }, 2000);
         });
@@ -1556,13 +1593,17 @@
                 ? 'bg-red-100' 
                 : type === 'message' 
                     ? 'bg-blue-100' 
-                    : 'bg-green-100';
+                    : type === 'success'
+                        ? 'bg-green-100'
+                        : 'bg-green-100';
             
             const iconColor = type === 'error'
                 ? 'text-red-600'
                 : type === 'message'
                     ? 'text-blue-600'
-                    : 'text-green-600';
+                    : type === 'success'
+                        ? 'text-green-600'
+                        : 'text-green-600';
 
             const icon = type === 'error'
                 ? `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1572,9 +1613,13 @@
                     ? `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                     </svg>`
-                    : `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                    </svg>`;
+                    : type === 'success'
+                        ? `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>`
+                        : `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>`;
 
             notification.className = `flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg notification-item`;
             
@@ -2090,30 +2135,138 @@
 
         // Delete task function
         async function deleteTask(taskId) {
+            // Hide menu first
+            const menuElement = document.getElementById(`menu-${taskId}`);
+            if (menuElement) {
+                menuElement.classList.add('hidden');
+            }
+            
             if (confirm('Are you sure you want to delete this task?')) {
                 try {
                     const tasks = await fetchTasks();
+                    const taskToDelete = tasks.find(task => task.id === taskId);
+                    
+                    if (!taskToDelete) {
+                        showNotification('Error', 'Task not found', 'error');
+                        return;
+                    }
+                    
                     const updatedTasks = tasks.filter(task => task.id !== taskId);
                     await saveTasks(updatedTasks, false);
                     await loadTasksFromConfluence(false);
-                    showNotification('Success', 'Task deleted successfully', 'notification');
+                    showNotification('Success', 'Task deleted successfully', 'success');
                 } catch (error) {
                     console.error('Error deleting task:', error);
                     showNotification('Error', 'Error deleting task. Please try again.', 'error');
                 }
             }
-            // Hide menu
-            document.getElementById(`menu-${taskId}`).classList.add('hidden');
         }
 
         // Export to Excel function
-        document.getElementById('export-excel').addEventListener('click', function() {
-            const tasks = getAllTasksFromDOM();
-            const ws = XLSX.utils.json_to_sheet(tasks);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Tasks");
-            XLSX.writeFile(wb, "kanban_tasks.xlsx");
-            showNotification('Success', 'Tasks exported to Excel successfully', 'notification');
+        document.getElementById('export-excel').addEventListener('click', async function() {
+            try {
+                // Get complete task data from server including lifecycle
+                const tasks = await fetchTasks();
+                
+                // Prepare tasks data for export
+                const exportData = tasks.map(task => {
+                    // Format lifecycle data as a readable string
+                    let lifecycleHistory = '';
+                    if (task.lifecycle && task.lifecycle.length > 0) {
+                        lifecycleHistory = task.lifecycle.map(entry => {
+                            const fromStatus = entry.fromStatus ? getStatusDisplayName(entry.fromStatus) : 'Created';
+                            const toStatus = getStatusDisplayName(entry.toStatus);
+                            const timestamp = formatDateTime(entry.timestamp);
+                            return `${timestamp}: ${entry.updatedBy} - ${fromStatus} → ${toStatus} (${entry.updateType}) - ${entry.comments}`;
+                        }).join('\n');
+                    }
+                    
+                    return {
+                        'Task ID': task.id,
+                        'Title': task.title,
+                        'Description': task.description,
+                        'Tag': getTagName(task.tag),
+                        'Priority': task.priority,
+                        'Assigned User': task.assignedUser || 'Unassigned',
+                        'Submitted By': task.submittedBy || 'Unknown',
+                        'Start Date': task.startDate || 'Not set',
+                        'Due Date': task.dueDate || 'Not set',
+                        'Current Status': getStatusDisplayName(task.column),
+                        'Days Until Deadline': getDaysUntilDeadline(task.dueDate),
+                        'Created At': formatDateTime(task.createdAt),
+                        'Last Updated': formatDateTime(task.updatedAt),
+                        'Lifecycle History': lifecycleHistory
+                    };
+                });
+                
+                // Create workbook with tasks
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                
+                // Auto-size columns
+                const colWidths = [
+                    { wch: 15 }, // Task ID
+                    { wch: 30 }, // Title
+                    { wch: 40 }, // Description
+                    { wch: 15 }, // Tag
+                    { wch: 10 }, // Priority
+                    { wch: 15 }, // Assigned User
+                    { wch: 15 }, // Submitted By
+                    { wch: 12 }, // Start Date
+                    { wch: 12 }, // Due Date
+                    { wch: 15 }, // Current Status
+                    { wch: 20 }, // Days Until Deadline
+                    { wch: 20 }, // Created At
+                    { wch: 20 }, // Last Updated
+                    { wch: 60 }  // Lifecycle History
+                ];
+                ws['!cols'] = colWidths;
+                
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Tasks");
+                
+                // Create a separate sheet for detailed lifecycle data
+                if (tasks.some(task => task.lifecycle && task.lifecycle.length > 0)) {
+                    const lifecycleData = [];
+                    tasks.forEach(task => {
+                        if (task.lifecycle && task.lifecycle.length > 0) {
+                            task.lifecycle.forEach(entry => {
+                                lifecycleData.push({
+                                    'Task ID': task.id,
+                                    'Task Title': task.title,
+                                    'Timestamp': formatDateTime(entry.timestamp),
+                                    'Updated By': entry.updatedBy,
+                                    'From Status': entry.fromStatus ? getStatusDisplayName(entry.fromStatus) : 'Created',
+                                    'To Status': getStatusDisplayName(entry.toStatus),
+                                    'Update Type': entry.updateType,
+                                    'Comments': entry.comments
+                                });
+                            });
+                        }
+                    });
+                    
+                    if (lifecycleData.length > 0) {
+                        const lifecycleWs = XLSX.utils.json_to_sheet(lifecycleData);
+                        const lifecycleColWidths = [
+                            { wch: 15 }, // Task ID
+                            { wch: 30 }, // Task Title
+                            { wch: 20 }, // Timestamp
+                            { wch: 15 }, // Updated By
+                            { wch: 15 }, // From Status
+                            { wch: 15 }, // To Status
+                            { wch: 15 }, // Update Type
+                            { wch: 50 }  // Comments
+                        ];
+                        lifecycleWs['!cols'] = lifecycleColWidths;
+                        XLSX.utils.book_append_sheet(wb, lifecycleWs, "Lifecycle History");
+                    }
+                }
+                
+                XLSX.writeFile(wb, "kanban_tasks_with_lifecycle.xlsx");
+                showNotification('Success', 'Tasks exported to Excel with lifecycle data successfully', 'notification');
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showNotification('Error', 'Error exporting tasks. Please try again.', 'error');
+            }
         });
 
         // Lifecycle Modal Functions
