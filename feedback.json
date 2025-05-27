@@ -1,0 +1,21 @@
+{
+  "feedback": [
+    {
+      "id": "fb_[timestamp]",
+      "name": "[user name or Anonymous]",
+      "type": "[feedback type]",
+      "message": "[feedback message]",
+      "timestamp": "[ISO timestamp]"
+    }
+  ],
+  "metadata": {
+    "lastUpdated": "[timestamp]",
+    "totalFeedback": [count],
+    "feedbackTypes": {
+      "suggestion": [count],
+      "bug": [count],
+      "improvement": [count],
+      "other": [count]
+    }
+  }
+}
