@@ -1,0 +1,28 @@
+{
+  "links": [
+    {
+      "id": "link_1234567890",
+      "title": "GitHub",
+      "description": "Code repository platform for version control",
+      "category": "Development",
+      "url": "github.com",
+      "timestamp": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "id": "link_1234567891", 
+      "title": "Confluence",
+      "description": "Documentation and collaboration platform",
+      "category": "Documentation",
+      "url": "atlassian.com/confluence",
+      "timestamp": "2024-01-15T09:15:00.000Z"
+    }
+  ],
+  "metadata": {
+    "lastUpdated": "2024-01-15T10:30:00.000Z",
+    "totalLinks": 2,
+    "categories": {
+      "Development": 1,
+      "Documentation": 1
+    }
+  }
+}
