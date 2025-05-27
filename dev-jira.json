@@ -8,15 +8,15 @@
       "priority": "high",
       "assignedUser": "User 1",
       "submittedBy": "User 2",
-      "startDate": "2024-01-01",
-      "dueDate": "2024-01-15",
+      "startDate": "2024-12-01",
+      "dueDate": "2024-12-15",
       "column": "progress",
-      "createdAt": "2024-01-01T09:00:00.000Z",
-      "updatedAt": "2024-01-03T14:30:00.000Z",
+      "createdAt": "2024-12-01T09:00:00.000Z",
+      "updatedAt": "2024-12-03T14:30:00.000Z",
       "lifecycle": [
         {
           "id": "lc_1704067200001",
-          "timestamp": "2024-01-01T09:00:00.000Z",
+          "timestamp": "2024-12-01T09:00:00.000Z",
           "fromStatus": null,
           "toStatus": "todo",
           "updateType": "creation",
@@ -25,7 +25,7 @@
         },
         {
           "id": "lc_1704153600001",
-          "timestamp": "2024-01-02T10:00:00.000Z",
+          "timestamp": "2024-12-02T10:00:00.000Z",
           "fromStatus": "todo",
           "toStatus": "progress",
           "updateType": "progress",
@@ -42,15 +42,15 @@
       "priority": "medium",
       "assignedUser": "User 3",
       "submittedBy": "User 4",
-      "startDate": "2024-01-02",
-      "dueDate": "2024-01-05",
+      "startDate": "2024-12-02",
+      "dueDate": "2024-12-05",
       "column": "review",
-      "createdAt": "2024-01-02T10:00:00.000Z",
-      "updatedAt": "2024-01-04T16:45:00.000Z",
+      "createdAt": "2024-12-02T10:00:00.000Z",
+      "updatedAt": "2024-12-04T16:45:00.000Z",
       "lifecycle": [
         {
           "id": "lc_1704153600002",
-          "timestamp": "2024-01-02T10:00:00.000Z",
+          "timestamp": "2024-12-02T10:00:00.000Z",
           "fromStatus": null,
           "toStatus": "todo",
           "updateType": "creation",
@@ -59,7 +59,7 @@
         },
         {
           "id": "lc_1704240000001",
-          "timestamp": "2024-01-03T11:30:00.000Z",
+          "timestamp": "2024-12-03T11:30:00.000Z",
           "fromStatus": "todo",
           "toStatus": "progress",
           "updateType": "progress",
@@ -68,7 +68,7 @@
         },
         {
           "id": "lc_1704326400001",
-          "timestamp": "2024-01-04T16:45:00.000Z",
+          "timestamp": "2024-12-04T16:45:00.000Z",
           "fromStatus": "progress",
           "toStatus": "review",
           "updateType": "review",
@@ -85,15 +85,15 @@
       "priority": "low",
       "assignedUser": "User 5",
       "submittedBy": "User 1",
-      "startDate": "2024-01-03",
-      "dueDate": "2024-01-20",
+      "startDate": "2024-12-03",
+      "dueDate": "2024-12-20",
       "column": "todo",
-      "createdAt": "2024-01-03T11:00:00.000Z",
-      "updatedAt": "2024-01-03T11:00:00.000Z",
+      "createdAt": "2024-12-03T11:00:00.000Z",
+      "updatedAt": "2024-12-03T11:00:00.000Z",
       "lifecycle": [
         {
           "id": "lc_1704240000002",
-          "timestamp": "2024-01-03T11:00:00.000Z",
+          "timestamp": "2024-12-03T11:00:00.000Z",
           "fromStatus": null,
           "toStatus": "todo",
           "updateType": "creation",
@@ -110,15 +110,15 @@
       "priority": "urgent",
       "assignedUser": "User 2",
       "submittedBy": "User 1",
-      "startDate": "2024-01-04",
-      "dueDate": "2024-01-08",
+      "startDate": "2024-12-04",
+      "dueDate": "2024-12-08",
       "column": "done",
-      "createdAt": "2024-01-04T08:00:00.000Z",
-      "updatedAt": "2024-01-07T17:30:00.000Z",
+      "createdAt": "2024-12-04T08:00:00.000Z",
+      "updatedAt": "2024-12-07T17:30:00.000Z",
       "lifecycle": [
         {
           "id": "lc_1704326400002",
-          "timestamp": "2024-01-04T08:00:00.000Z",
+          "timestamp": "2024-12-04T08:00:00.000Z",
           "fromStatus": null,
           "toStatus": "todo",
           "updateType": "creation",
@@ -127,7 +127,7 @@
         },
         {
           "id": "lc_1704412800001",
-          "timestamp": "2024-01-05T09:15:00.000Z",
+          "timestamp": "2024-12-05T09:15:00.000Z",
           "fromStatus": "todo",
           "toStatus": "progress",
           "updateType": "progress",
@@ -136,7 +136,7 @@
         },
         {
           "id": "lc_1704499200001",
-          "timestamp": "2024-01-06T14:20:00.000Z",
+          "timestamp": "2024-12-06T14:20:00.000Z",
           "fromStatus": "progress",
           "toStatus": "review",
           "updateType": "review",
@@ -145,7 +145,7 @@
         },
         {
           "id": "lc_1704585600001",
-          "timestamp": "2024-01-07T17:30:00.000Z",
+          "timestamp": "2024-12-07T17:30:00.000Z",
           "fromStatus": "review",
           "toStatus": "done",
           "updateType": "completion",
@@ -162,15 +162,15 @@
       "priority": "none",
       "assignedUser": "User 4",
       "submittedBy": "User 3",
-      "startDate": "2024-01-05",
-      "dueDate": "2024-01-12",
+      "startDate": "2024-12-05",
+      "dueDate": "2024-12-12",
       "column": "todo",
-      "createdAt": "2024-01-05T13:00:00.000Z",
-      "updatedAt": "2024-01-05T13:00:00.000Z",
+      "createdAt": "2024-12-05T13:00:00.000Z",
+      "updatedAt": "2024-12-05T13:00:00.000Z",
       "lifecycle": [
         {
           "id": "lc_1704412800002",
-          "timestamp": "2024-01-05T13:00:00.000Z",
+          "timestamp": "2024-12-05T13:00:00.000Z",
           "fromStatus": null,
           "toStatus": "todo",
           "updateType": "creation",
@@ -178,6 +178,49 @@
           "updatedBy": "User 3"
         }
       ]
+    },
+    {
+      "id": "1704499200000",
+      "title": "Setup CI/CD pipeline",
+      "description": "Configure automated testing and deployment pipeline using GitHub Actions. Include staging and production environments.",
+      "tag": "green",
+      "priority": "high",
+      "assignedUser": "User 1",
+      "submittedBy": "User 2",
+      "startDate": "2024-12-06",
+      "dueDate": "2024-12-10",
+      "column": "review",
+      "createdAt": "2024-12-06T09:00:00.000Z",
+      "updatedAt": "2024-12-08T15:30:00.000Z",
+      "lifecycle": [
+        {
+          "id": "lc_1704499200002",
+          "timestamp": "2024-12-06T09:00:00.000Z",
+          "fromStatus": null,
+          "toStatus": "todo",
+          "updateType": "creation",
+          "comments": "Task created",
+          "updatedBy": "User 2"
+        },
+        {
+          "id": "lc_1704585600002",
+          "timestamp": "2024-12-07T10:00:00.000Z",
+          "fromStatus": "todo",
+          "toStatus": "progress",
+          "updateType": "progress",
+          "comments": "Started setting up GitHub Actions workflow",
+          "updatedBy": "User 1"
+        },
+        {
+          "id": "lc_1704672000001",
+          "timestamp": "2024-12-08T15:30:00.000Z",
+          "fromStatus": "progress",
+          "toStatus": "review",
+          "updateType": "review",
+          "comments": "Pipeline configured, ready for testing",
+          "updatedBy": "User 1"
+        }
+      ]
     }
   ]
-}
+} 
