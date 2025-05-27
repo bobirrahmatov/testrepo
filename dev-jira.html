@@ -1030,21 +1030,11 @@
                 // Update charts only if containers exist and there are tasks
                 if (tasks.length === 0) {
                     // Handle empty state for all charts
-                    if (document.getElementById('statusChart')) {
-                        updateStatusChart([]);
-                    }
-                    if (document.getElementById('priorityChart')) {
-                        updatePriorityChart([]);
-                    }
-                    if (document.getElementById('tagChart')) {
-                        updateTagChart([]);
-                    }
-                    if (document.getElementById('assigneeChart')) {
-                        updateAssigneeChart([]);
-                    }
-                    if (document.getElementById('timelineChart')) {
-                        updateTimelineChart([]);
-                    }
+                    updateStatusChart([]);
+                    updatePriorityChart([]);
+                    updateTagChart([]);
+                    updateAssigneeChart([]);
+                    updateTimelineChart([]);
                     
                     // Show message for no data only if notifications are enabled
                     if (showNotifications) {
@@ -1052,21 +1042,11 @@
                     }
                 } else {
                     // Update charts with actual data
-                    if (document.getElementById('statusChart')) {
-                        updateStatusChart(tasks);
-                    }
-                    if (document.getElementById('priorityChart')) {
-                        updatePriorityChart(tasks);
-                    }
-                    if (document.getElementById('tagChart')) {
-                        updateTagChart(tasks);
-                    }
-                    if (document.getElementById('assigneeChart')) {
-                        updateAssigneeChart(tasks);
-                    }
-                    if (document.getElementById('timelineChart')) {
-                        updateTimelineChart(tasks);
-                    }
+                    updateStatusChart(tasks);
+                    updatePriorityChart(tasks);
+                    updateTagChart(tasks);
+                    updateAssigneeChart(tasks);
+                    updateTimelineChart(tasks);
                     
                     // Show success message for data loaded only if notifications are enabled
                     if (showNotifications) {
@@ -1082,7 +1062,12 @@
         // Status Distribution Chart
         function updateStatusChart(tasks) {
             try {
-                const ctx = document.getElementById('statusChart').getContext('2d');
+                const chartElement = document.getElementById('statusChart');
+                if (!chartElement) {
+                    console.debug('Status chart element not found');
+                    return;
+                }
+                const ctx = chartElement.getContext('2d');
                 if (window.statusChart) {
                     window.statusChart.destroy();
                 }
@@ -1162,7 +1147,12 @@
         // Priority Distribution Chart
         function updatePriorityChart(tasks) {
             try {
-                const ctx = document.getElementById('priorityChart').getContext('2d');
+                const chartElement = document.getElementById('priorityChart');
+                if (!chartElement) {
+                    console.debug('Priority chart element not found');
+                    return;
+                }
+                const ctx = chartElement.getContext('2d');
                 if (window.priorityChart) {
                     window.priorityChart.destroy();
                 }
@@ -1257,7 +1247,12 @@
         // Tag Distribution Chart
         function updateTagChart(tasks) {
             try {
-                const ctx = document.getElementById('tagChart').getContext('2d');
+                const chartElement = document.getElementById('tagChart');
+                if (!chartElement) {
+                    console.debug('Tag chart element not found');
+                    return;
+                }
+                const ctx = chartElement.getContext('2d');
                 if (window.tagChart) {
                     window.tagChart.destroy();
                 }
@@ -1344,7 +1339,12 @@
         // Assignee Workload Chart
         function updateAssigneeChart(tasks) {
             try {
-                const ctx = document.getElementById('assigneeChart').getContext('2d');
+                const chartElement = document.getElementById('assigneeChart');
+                if (!chartElement) {
+                    console.debug('Assignee chart element not found');
+                    return;
+                }
+                const ctx = chartElement.getContext('2d');
                 if (window.assigneeChart) {
                     window.assigneeChart.destroy();
                 }
@@ -1438,7 +1438,12 @@
         // Timeline Chart
         function updateTimelineChart(tasks) {
             try {
-                const ctx = document.getElementById('timelineChart').getContext('2d');
+                const chartElement = document.getElementById('timelineChart');
+                if (!chartElement) {
+                    console.debug('Timeline chart element not found');
+                    return;
+                }
+                const ctx = chartElement.getContext('2d');
                 if (window.timelineChart) {
                     window.timelineChart.destroy();
                 }
