@@ -199,13 +199,6 @@
         </div>
     </div>
 
-    <!-- Message Component -->
-    <div class="fixed bottom-4 right-4 z-50" id="notificationsContainer">
-        <div class="flex flex-col gap-4">
-            <!-- Notifications will be dynamically added here -->
-        </div>
-    </div>
-
     <!-- Feedback Button -->
     <button onclick="toggleFeedbackForm()" class="fixed left-4 bottom-4 z-50 flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -264,6 +257,13 @@
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Message Component -->
+    <div class="fixed bottom-4 right-4 z-50" id="notificationsContainer">
+        <div class="flex flex-col gap-4">
+            <!-- Notifications will be dynamically added here -->
         </div>
     </div>
 
@@ -826,6 +826,7 @@
             event.preventDefault();
             
             const feedbackData = {
+                id: `fb_${Date.now()}`,
                 name: document.getElementById('feedbackName').value || 'Anonymous',
                 type: document.getElementById('feedbackType').value,
                 message: document.getElementById('feedbackMessage').value,
@@ -833,22 +834,55 @@
             };
 
             try {
-                const response = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment', {
+                // First, get the attachment ID for feedback.json
+                const attachmentsResponse = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment?filename=feedback.json');
+                const attachmentsData = await attachmentsResponse.json();
+                
+                let attachmentId;
+                let existingFeedback = { feedback: [], metadata: { lastUpdated: '', totalFeedback: 0, feedbackTypes: {} } };
+
+                if (attachmentsData.results && attachmentsData.results.length > 0) {
+                    // If feedback.json exists, get its content
+                    attachmentId = attachmentsData.results[0].id;
+                    const feedbackResponse = await fetch(`https://cedt-confluence.net/confluence/download/attachments/2740868871/feedback.json?api=v2`);
+                    if (feedbackResponse.ok) {
+                        existingFeedback = await feedbackResponse.json();
+                    }
+                }
+
+                // Add new feedback
+                existingFeedback.feedback.unshift(feedbackData);
+
+                // Update metadata
+                existingFeedback.metadata = {
+                    lastUpdated: feedbackData.timestamp,
+                    totalFeedback: existingFeedback.feedback.length,
+                    feedbackTypes: existingFeedback.feedback.reduce((acc, fb) => {
+                        acc[fb.type] = (acc[fb.type] || 0) + 1;
+                        return acc;
+                    }, {})
+                };
+
+                // Create or update the attachment
+                const formData = new FormData();
+                const blob = new Blob([JSON.stringify(existingFeedback, null, 2)], { type: 'application/json' });
+                formData.append('file', blob, 'feedback.json');
+
+                const response = await fetch(`https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment${attachmentId ? `/${attachmentId}` : ''}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-Atlassian-Token': 'no-check'
                     },
-                    body: JSON.stringify(feedbackData)
+                    body: formData
                 });
 
-                if (response.ok) {
-                    showNotification('Success', 'Thank you for your feedback!', 'notification');
-                    document.getElementById('feedbackForm').reset();
-                    toggleFeedbackForm();
-                } else {
-                    throw new Error('Failed to submit feedback');
+                if (!response.ok) {
+                    throw new Error(`Failed to save feedback: ${response.status} ${response.statusText}`);
                 }
+
+                showNotification('Success', 'Thank you for your feedback!', 'success');
+                document.getElementById('feedbackForm').reset();
+                toggleFeedbackForm();
             } catch (error) {
                 console.error('Error submitting feedback:', error);
                 showNotification('Error', 'Failed to submit feedback. Please try again.', 'error');
