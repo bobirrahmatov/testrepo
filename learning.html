@@ -7,34 +7,6 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        /* Video card hover effect */
-        .video-card {
-            transition: transform 0.2s ease-in-out;
-        }
-        .video-card:hover {
-            transform: translateY(-4px);
-        }
-        /* Category badge styles */
-        .category-badge {
-            transition: all 0.2s ease-in-out;
-        }
-        .category-badge:hover {
-            transform: scale(1.05);
-        }
         /* Loading animation */
         @keyframes shimmer {
             0% {
@@ -49,40 +21,18 @@
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
-        /* Tooltip styles */
+        /* Tooltip styles - using Tailwind classes */
         .tooltip {
-            position: relative;
+            @apply relative;
         }
         .tooltip .tooltip-text {
-            visibility: hidden;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.2s;
-            background-color: #1f2937;
-            color: white;
+            @apply invisible absolute z-10 -bottom-2 left-1/2 -translate-x-1/2 px-2 py-1 text-xs whitespace-nowrap opacity-0 transition-opacity duration-200 bg-gray-800 text-white rounded;
         }
         .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
+            @apply visible opacity-100;
         }
-        /* Tooltip arrow */
         .tooltip .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #1f2937 transparent transparent transparent;
+            @apply content-[''] absolute top-full left-1/2 -ml-[5px] border-[5px] border-solid border-transparent border-t-gray-800;
         }
     </style>
 </head>
@@ -390,7 +340,7 @@
         function createVideoCard(video) {
             const categoryInfo = getCategoryInfo(video.category);
             return `
-                <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4">
+                <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:scale-105">
                     <div class="relative mb-4 aspect-video overflow-hidden rounded-lg">
                         <img src="${video.thumbnail}" alt="${video.title}" class="h-full w-full object-cover">
                         <a href="${video.videoUrl}" target="_blank" 
@@ -401,15 +351,15 @@
                         </a>
                     </div>
                     <div class="flex flex-col flex-grow">
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900">${video.title}</h3>
-                        <p class="mb-4 text-sm text-gray-600">${video.description}</p>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">${video.title}</h3>
+                        <p class="mb-4 text-sm text-gray-600 line-clamp-3">${video.description}</p>
                     </div>
-                    <div class="mt-auto flex items-center justify-between">
-                        <span class="category-badge flex items-center gap-1 rounded-full ${categoryInfo.color} px-3 py-1 text-xs font-medium">
+                    <div class="mt-auto flex items-center justify-between gap-2">
+                        <span class="category-badge flex items-center gap-1 rounded-full ${categoryInfo.color} px-3 py-1 text-xs font-medium whitespace-nowrap">
                             ${categoryInfo.icon}
                             ${categoryInfo.name}
                         </span>
-                        <a href="${video.procedureLink}" download class="tooltip flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                        <a href="${video.procedureLink}" download class="tooltip flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
                             Procedure
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
