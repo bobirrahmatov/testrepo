@@ -863,37 +863,106 @@
             console.log('Modal should be closed now');
 
             try {
-                // First, get the current Excel file
-                const excelResponse = await fetch('https://cedt-confluence.net/confluence/download/attachments/2740868871/videos.xlsx?api=v2', {
-                    headers: {
-                        'X-Atlassian-Token': 'no-check'
+                // First, get the attachment ID for videos.xlsx
+                const attachmentsResponse = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment?filename=videos.xlsx');
+                const attachmentsData = await attachmentsResponse.json();
+                
+                let attachmentId;
+                let existingVideos = [];
+
+                if (attachmentsData.results && attachmentsData.results.length > 0) {
+                    // If videos.xlsx exists, get its content and attachment ID
+                    attachmentId = attachmentsData.results[0].id;
+                    
+                    const excelResponse = await fetch(`https://cedt-confluence.net/confluence/download/attachments/2740868871/videos.xlsx?api=v2`, {
+                        headers: {
+                            'X-Atlassian-Token': 'no-check'
+                        }
+                    });
+
+                    if (excelResponse.ok) {
+                        const excelBlob = await excelResponse.blob();
+                        const reader = new FileReader();
+
+                        reader.onload = async function(e) {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                            existingVideos = XLSX.utils.sheet_to_json(firstSheet);
+
+                            // Add new video to the existing data
+                            existingVideos.push(newVideo);
+
+                            // Add the new row to the existing sheet (preserving headers and formatting)
+                            const range = XLSX.utils.decode_range(firstSheet['!ref']);
+                            const newRowIndex = range.e.r + 1; // Next row after the last data row
+                            
+                            // Add each field of the new video to the sheet
+                            const headers = ['title', 'description', 'videoUrl', 'thumbnail', 'category', 'procedureLink'];
+                            headers.forEach((header, colIndex) => {
+                                const cellAddress = XLSX.utils.encode_cell({ r: newRowIndex, c: colIndex });
+                                firstSheet[cellAddress] = { v: newVideo[header], t: 's' };
+                            });
+                            
+                            // Update the sheet range to include the new row
+                            firstSheet['!ref'] = XLSX.utils.encode_range({
+                                s: { r: range.s.r, c: range.s.c },
+                                e: { r: newRowIndex, c: range.e.c }
+                            });
+
+                            // Convert to blob using the original workbook (preserving structure)
+                            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                            // Upload the updated Excel file using the attachment ID
+                            const formData = new FormData();
+                            formData.append('file', blob, 'videos.xlsx');
+
+                            const uploadResponse = await fetch(`https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment/${attachmentId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Atlassian-Token': 'no-check'
+                                },
+                                body: formData
+                            });
+
+                            if (!uploadResponse.ok) {
+                                throw new Error(`Failed to update Excel file: ${uploadResponse.status} ${uploadResponse.statusText}`);
+                            }
+
+                            showNotification('Success', 'Video added successfully!', 'notification');
+                            
+                            // Add the new video to the current videos array and update the grid immediately
+                            const transformedVideo = {
+                                id: Math.random().toString(36).substr(2, 9),
+                                title: newVideo.title,
+                                description: newVideo.description,
+                                thumbnail: newVideo.thumbnail,
+                                videoUrl: newVideo.videoUrl,
+                                category: newVideo.category.toLowerCase(),
+                                procedureLink: newVideo.procedureLink
+                            };
+                            
+                            videos.push(transformedVideo);
+                            filteredVideos = [...videos];
+                            updateVideoGrid();
+                        };
+
+                        reader.readAsArrayBuffer(excelBlob);
+                    } else {
+                        throw new Error('Failed to fetch existing videos.xlsx file');
                     }
-                });
-
-                if (!excelResponse.ok) {
-                    throw new Error('Failed to fetch videos.xlsx file');
-                }
-
-                const excelBlob = await excelResponse.blob();
-                const reader = new FileReader();
-
-                reader.onload = async function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                    // Add new video to the data
-                    jsonData.push(newVideo);
-
-                    // Update the existing sheet with new data
-                    XLSX.utils.sheet_add_json(firstSheet, jsonData, { skipHeader: true });
+                } else {
+                    // If videos.xlsx doesn't exist, create a new one
+                    const newWorkbook = XLSX.utils.book_new();
+                    const newWorksheet = XLSX.utils.json_to_sheet([newVideo]);
+                    XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Videos');
 
                     // Convert to blob
-                    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                    const excelBuffer = XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' });
                     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-                    // Upload the updated Excel file
+                    // Upload the new Excel file
                     const formData = new FormData();
                     formData.append('file', blob, 'videos.xlsx');
 
@@ -906,14 +975,12 @@
                     });
 
                     if (!uploadResponse.ok) {
-                        throw new Error('Failed to upload updated Excel file');
+                        throw new Error(`Failed to create Excel file: ${uploadResponse.status} ${uploadResponse.statusText}`);
                     }
 
                     showNotification('Success', 'Video added successfully!', 'notification');
                     fetchVideoData(); // Refresh the video list
-                };
-
-                reader.readAsArrayBuffer(excelBlob);
+                }
             } catch (error) {
                 console.error('Error adding video:', error);
                 showNotification('Error', 'Failed to add video. Please try again.', 'error');
