@@ -897,8 +897,12 @@
                             const range = XLSX.utils.decode_range(firstSheet['!ref']);
                             const newRowIndex = range.e.r + 1; // Next row after the last data row
                             
+                            // Generate ID for the new video
+                            const videoId = Math.random().toString(36).substr(2, 9);
+                            newVideo.id = videoId;
+                            
                             // Add each field of the new video to the sheet
-                            const headers = ['title', 'description', 'videoUrl', 'thumbnail', 'category', 'procedureLink'];
+                            const headers = ['id', 'title', 'description', 'videoUrl', 'thumbnail', 'category', 'procedureLink'];
                             headers.forEach((header, colIndex) => {
                                 const cellAddress = XLSX.utils.encode_cell({ r: newRowIndex, c: colIndex });
                                 firstSheet[cellAddress] = { v: newVideo[header], t: 's' };
