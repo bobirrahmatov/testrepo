@@ -21,6 +21,20 @@
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
+        
+        /* Pulse animation for loading placeholders */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -376,8 +390,9 @@
                                 </div>
 
                                 <div class="w-full px-2.5">
-                                    <input type="url" id="thumbnailUrl" placeholder="Thumbnail Image URL" required
+                                    <input type="url" id="thumbnailUrl" placeholder="Thumbnail Image URL (Optional - will auto-generate from video)"
                                         class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                    <p class="mt-1 text-xs text-gray-500">Leave empty to automatically generate thumbnail from the first frame of your SharePoint video</p>
                                 </div>
 
                                 <div class="w-full px-2.5">
@@ -415,6 +430,7 @@
         let currentPage = 1;
         let itemsPerPage = 8;
         let selectedCategory = 'all';
+        let thumbnailCache = new Map(); // Cache for generated thumbnails
 
         // Function to fetch video data from Confluence Excel attachment
         async function fetchVideoData() {
@@ -511,13 +527,117 @@
             return categories[category] || categories['others'];
         }
 
-        // Function to create video card
-        function createVideoCard(video) {
+        // Function to handle SharePoint video URLs
+        function getSharePointVideoUrl(originalUrl) {
+            // If it's a SharePoint URL, we might need to modify it for direct access
+            if (originalUrl.includes('sharepoint.com') || originalUrl.includes('.sharepoint.')) {
+                // For SharePoint videos, try to get the direct video URL
+                // This might need adjustment based on your SharePoint setup
+                return originalUrl;
+            }
+            return originalUrl;
+        }
+
+        // Function to generate thumbnail from video URL
+        async function generateThumbnailFromVideo(videoUrl) {
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                video.crossOrigin = 'anonymous';
+                video.muted = true;
+                video.playsInline = true;
+                video.preload = 'metadata';
+                
+                // Handle SharePoint URLs
+                const processedUrl = getSharePointVideoUrl(videoUrl);
+                
+                video.onloadedmetadata = () => {
+                    // Set video to first frame (avoid potential black frames at start)
+                    video.currentTime = Math.min(1, video.duration * 0.1);
+                };
+                
+                video.onseeked = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Set canvas dimensions (maintain aspect ratio, max 300x200)
+                        const maxWidth = 300;
+                        const maxHeight = 200;
+                        let { videoWidth, videoHeight } = video;
+                        
+                        if (videoWidth > maxWidth || videoHeight > maxHeight) {
+                            const ratio = Math.min(maxWidth / videoWidth, maxHeight / videoHeight);
+                            videoWidth *= ratio;
+                            videoHeight *= ratio;
+                        }
+                        
+                        canvas.width = videoWidth;
+                        canvas.height = videoHeight;
+                        
+                        // Draw the video frame to canvas
+                        ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+                        
+                        // Convert canvas to data URL with good quality
+                        const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                        resolve(thumbnailDataUrl);
+                    } catch (error) {
+                        console.error('Error generating thumbnail:', error);
+                        // Fallback to placeholder
+                        resolve('https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Video+Thumbnail');
+                    }
+                };
+                
+                video.onerror = (error) => {
+                    console.error('Error loading video for thumbnail generation:', error);
+                    // Fallback to placeholder
+                    resolve('https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Video+Thumbnail');
+                };
+                
+                video.onabort = () => {
+                    console.warn('Video loading aborted');
+                    resolve('https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Video+Thumbnail');
+                };
+                
+                // Set timeout to avoid hanging
+                setTimeout(() => {
+                    if (video.readyState < 2) { // HAVE_CURRENT_DATA
+                        console.warn('Video loading timeout');
+                        resolve('https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Video+Thumbnail');
+                    }
+                }, 10000); // 10 second timeout
+                
+                video.src = processedUrl;
+                video.load();
+            });
+        }
+
+        // Function to create video card with dynamic thumbnail
+        async function createVideoCard(video) {
             const categoryInfo = getCategoryInfo(video.category);
+            
+            // Generate thumbnail if not provided or if it's a placeholder
+            let thumbnailUrl = video.thumbnail;
+            if (!thumbnailUrl || thumbnailUrl.includes('placeholder') || thumbnailUrl.includes('via.placeholder') || thumbnailUrl === 'auto-generate') {
+                // Check cache first
+                if (thumbnailCache.has(video.videoUrl)) {
+                    thumbnailUrl = thumbnailCache.get(video.videoUrl);
+                } else {
+                    try {
+                        thumbnailUrl = await generateThumbnailFromVideo(video.videoUrl);
+                        // Cache the generated thumbnail
+                        thumbnailCache.set(video.videoUrl, thumbnailUrl);
+                    } catch (error) {
+                        console.error('Failed to generate thumbnail for video:', video.title, error);
+                        thumbnailUrl = 'https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Video+Thumbnail';
+                    }
+                }
+            }
+            
             return `
                 <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:border-blue-600">
                     <div class="relative mb-4 aspect-video overflow-hidden rounded-lg">
-                        <img src="${video.thumbnail}" alt="${video.title}" class="h-full w-full object-cover">
+                        <img src="${thumbnailUrl}" alt="${video.title}" class="h-full w-full object-cover" 
+                             onerror="this.src='https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Video+Thumbnail'">
                         <a href="${video.videoUrl}" target="_blank" 
                            class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity hover:opacity-100">
                             <svg class="h-16 w-16 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -644,8 +764,8 @@
             }
         }
 
-        // Function to update video grid
-        function updateVideoGrid() {
+        // Function to update video grid with async thumbnail generation
+        async function updateVideoGrid() {
             const videoGrid = document.getElementById('videoGrid');
             const noResultsState = document.getElementById('noResultsState');
             const paginationContainer = document.getElementById('paginationContainer');
@@ -663,7 +783,42 @@
                 const end = start + itemsPerPage;
                 const pageData = filteredVideos.slice(start, end);
                 
-                videoGrid.innerHTML = pageData.map(createVideoCard).join('');
+                // Check if any videos need thumbnail generation
+                const needsThumbnailGeneration = pageData.some(video => 
+                    !video.thumbnail || 
+                    video.thumbnail.includes('placeholder') || 
+                    video.thumbnail.includes('via.placeholder') || 
+                    video.thumbnail === 'auto-generate'
+                );
+                
+                if (needsThumbnailGeneration) {
+                    showNotification('Processing', 'Generating thumbnails from videos...', 'message');
+                }
+                
+                // Show loading placeholders first
+                videoGrid.innerHTML = pageData.map(() => `
+                    <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out">
+                        <div class="relative mb-4 aspect-video overflow-hidden rounded-lg bg-gray-200 animate-pulse">
+                            <div class="h-full w-full bg-gray-300"></div>
+                        </div>
+                        <div class="flex flex-col flex-grow">
+                            <div class="mb-2 h-6 bg-gray-300 rounded animate-pulse"></div>
+                            <div class="mb-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                        <div class="mt-auto flex items-center justify-between gap-2">
+                            <div class="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                            <div class="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Generate video cards with thumbnails asynchronously
+                const videoCards = await Promise.all(pageData.map(createVideoCard));
+                videoGrid.innerHTML = videoCards.join('');
+                
+                if (needsThumbnailGeneration) {
+                    showNotification('Complete', 'Thumbnails generated successfully!', 'notification');
+                }
             }
             updatePagination();
         }
@@ -849,11 +1004,12 @@
             event.preventDefault();
             console.log('Form submitted, closing modal...');
             
+            const thumbnailValue = document.getElementById('thumbnailUrl').value.trim();
             const newVideo = {
                 title: document.getElementById('videoTitle').value,
                 description: document.getElementById('videoDescription').value,
                 videoUrl: document.getElementById('videoUrl').value,
-                thumbnail: document.getElementById('thumbnailUrl').value,
+                thumbnail: thumbnailValue || 'auto-generate', // Use placeholder if empty
                 category: document.getElementById('videoCategory').value,
                 procedureLink: document.getElementById('procedureLink').value
             };
