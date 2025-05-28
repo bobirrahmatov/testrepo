@@ -3,364 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SharePoint Video Thumbnail Generator</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        input[type="url"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 4px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        
-        input[type="url"]:focus {
-            outline: none;
-            border-color: #0052cc;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .btn-primary {
-            background-color: #0052cc;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #0747a6;
-        }
-        
-        .btn-secondary {
-            background-color: #f4f5f7;
-            color: #172b4d;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #ebecf0;
-        }
-        
-        .status {
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        
-        .status.loading {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
-        .status.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .thumbnail-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .thumbnail {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        
-        .video-info {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            font-size: 14px;
-            color: #6c757d;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .time-input {
-            width: 80px;
-            padding: 8px;
-            margin-left: 10px;
-            border: 1px solid #e1e5e9;
-            border-radius: 4px;
-        }
-        
-        .sample-urls {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e3f2fd;
-            border-radius: 4px;
-            border-left: 4px solid #2196f3;
-        }
-        
-        .sample-urls h4 {
-            margin: 0 0 10px 0;
-            color: #1976d2;
-        }
-        
-        .sample-urls code {
-            background-color: #f5f5f5;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-size: 12px;
-            word-break: break-all;
-        }
-    </style>
+    <title>SharePoint Video Embedding Example</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>SharePoint Video Thumbnail Generator</h1>
-        <p>Extract thumbnails from SharePoint-hosted MP4 videos for Confluence pages</p>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">SharePoint Video Embedding Examples</h1>
         
-        <div class="input-group">
-            <label for="videoUrl">SharePoint Video URL:</label>
-            <input type="url" id="videoUrl" placeholder="https://yourcompany.sharepoint.com/path/to/video.mp4">
-        </div>
-        
-        <div class="input-group">
-            <label for="timeSeek">Thumbnail time (seconds):</label>
-            <input type="number" id="timeSeek" class="time-input" value="2" min="0" step="0.1">
-            <small style="margin-left: 10px; color: #666;">Time in video to capture thumbnail</small>
-        </div>
-        
-        <div class="button-group">
-            <button id="generateBtn" class="btn-primary">Generate Thumbnail</button>
-            <button id="clearBtn" class="btn-secondary">Clear</button>
-        </div>
-        
-        <div id="status" class="status hidden"></div>
-        
-        <div id="thumbnailContainer" class="thumbnail-container hidden">
-            <img id="thumbnailImage" class="thumbnail" alt="Video thumbnail">
-            <div id="videoInfo" class="video-info"></div>
-        </div>
-        
-        <div class="sample-urls">
-            <h4>SharePoint URL Formats to Try:</h4>
-            <p><strong>Direct file URL:</strong><br>
-            <code>https://company.sharepoint.com/sites/sitename/Shared%20Documents/video.mp4</code></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Example 1: SharePoint Embed Code -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <h2 class="text-xl font-semibold mb-4">SharePoint Embedded Video</h2>
+                <div class="relative mb-4 aspect-video overflow-hidden rounded-lg bg-gray-100">
+                    <div class="absolute inset-0">
+                        <!-- Example SharePoint embed code (replace with actual) -->
+                        <iframe 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                            src="https://citieursharepointcom.sharepoint.com/teams/SP0_wcmreportinghub/_layouts/15/embed.aspx?UniqueId=your-video-id"
+                            frameborder="0" 
+                            allowfullscreen 
+                            title="Example SharePoint Video">
+                        </iframe>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600">This video is embedded directly from SharePoint using an iframe.</p>
+            </div>
             
-            <p><strong>Personal OneDrive:</strong><br>
-            <code>https://company-my.sharepoint.com/personal/username_company_com/Documents/video.mp4</code></p>
-            
-            <p><strong>Note:</strong> Some SharePoint URLs may require authentication or have CORS restrictions.</p>
+            <!-- Example 2: Regular Video with Thumbnail -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <h2 class="text-xl font-semibold mb-4">Regular Video with Thumbnail</h2>
+                <div class="relative mb-4 aspect-video overflow-hidden rounded-lg">
+                    <img src="https://via.placeholder.com/300x200?text=Video+Thumbnail" alt="Video Thumbnail" class="h-full w-full object-cover">
+                    <a href="#" target="_blank" 
+                       class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity hover:opacity-100">
+                        <svg class="h-16 w-16 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 5v14l11-7z"></path>
+                        </svg>
+                    </a>
+                </div>
+                <p class="text-sm text-gray-600">This is a fallback for regular video URLs with thumbnails.</p>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-900 mb-3">How to Get SharePoint Embed Code:</h3>
+            <ol class="list-decimal list-inside space-y-2 text-blue-800">
+                <li>Navigate to your video in SharePoint</li>
+                <li>Click the "..." (more options) button on the video</li>
+                <li>Select "Embed" from the dropdown menu</li>
+                <li>Copy the iframe code that appears</li>
+                <li>Paste it into the "Video URL/Embed Code" field in the form</li>
+            </ol>
+            <p class="mt-4 text-sm text-blue-700">
+                <strong>Example embed code format:</strong><br>
+                <code class="bg-blue-100 px-2 py-1 rounded text-xs">
+                    &lt;iframe src="https://your-sharepoint-site.com/..." width="640" height="360"&gt;&lt;/iframe&gt;
+                </code>
+            </p>
         </div>
     </div>
-
-    <script>
-        const videoUrlInput = document.getElementById('videoUrl');
-        const timeSeekInput = document.getElementById('timeSeek');
-        const generateBtn = document.getElementById('generateBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const status = document.getElementById('status');
-        const thumbnailContainer = document.getElementById('thumbnailContainer');
-        const thumbnailImage = document.getElementById('thumbnailImage');
-        const videoInfo = document.getElementById('videoInfo');
-
-        function showStatus(message, type) {
-            status.textContent = message;
-            status.className = `status ${type}`;
-            status.classList.remove('hidden');
-        }
-
-        function hideStatus() {
-            status.classList.add('hidden');
-        }
-
-        function convertSharePointUrl(url) {
-            // Try to convert various SharePoint URL formats to direct access
-            let directUrl = url;
-            
-            // Handle sharing URLs
-            if (url.includes('?')) {
-                // Add download parameter if not present
-                if (!url.includes('download=')) {
-                    directUrl = url + (url.includes('?') ? '&' : '?') + 'download=1';
-                }
-            }
-            
-            // Remove any encoding issues
-            directUrl = decodeURIComponent(directUrl);
-            
-            return directUrl;
-        }
-
-        function generateThumbnail(videoUrl, seekTime) {
-            return new Promise((resolve, reject) => {
-                const video = document.createElement('video');
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Convert SharePoint URL
-                const directUrl = convertSharePointUrl(videoUrl);
-                
-                video.crossOrigin = 'anonymous';
-                video.muted = true; // Required for autoplay policies
-                video.preload = 'metadata';
-                
-                let hasLoaded = false;
-                
-                video.onloadedmetadata = () => {
-                    console.log('Video metadata loaded');
-                    canvas.width = video.videoWidth || 640;
-                    canvas.height = video.videoHeight || 480;
-                    
-                    // Set the time to seek to
-                    video.currentTime = Math.min(seekTime, video.duration || seekTime);
-                };
-                
-                video.onseeked = () => {
-                    if (hasLoaded) return; // Prevent multiple calls
-                    hasLoaded = true;
-                    
-                    try {
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
-                        
-                        resolve({
-                            thumbnail: thumbnail,
-                            width: video.videoWidth,
-                            height: video.videoHeight,
-                            duration: video.duration
-                        });
-                    } catch (error) {
-                        reject(new Error('Failed to draw video frame: ' + error.message));
-                    }
-                };
-                
-                video.oncanplaythrough = () => {
-                    if (!hasLoaded && video.readyState >= 3) {
-                        video.currentTime = Math.min(seekTime, video.duration || seekTime);
-                    }
-                };
-                
-                video.onerror = (e) => {
-                    console.error('Video error:', e);
-                    reject(new Error('Failed to load video. This might be due to CORS restrictions or authentication requirements.'));
-                };
-                
-                video.onabort = () => {
-                    reject(new Error('Video loading was aborted.'));
-                };
-                
-                // Set timeout to prevent hanging
-                setTimeout(() => {
-                    if (!hasLoaded) {
-                        reject(new Error('Video loading timeout. Check if the URL is accessible.'));
-                    }
-                }, 15000);
-                
-                console.log('Loading video from:', directUrl);
-                video.src = directUrl;
-                video.load();
-            });
-        }
-
-        generateBtn.addEventListener('click', async () => {
-            const videoUrl = videoUrlInput.value.trim();
-            const seekTime = parseFloat(timeSeekInput.value) || 2;
-            
-            if (!videoUrl) {
-                showStatus('Please enter a video URL', 'error');
-                return;
-            }
-            
-            if (!videoUrl.toLowerCase().includes('.mp4')) {
-                showStatus('Please ensure the URL points to an MP4 file', 'error');
-                return;
-            }
-            
-            generateBtn.disabled = true;
-            showStatus('Loading video and generating thumbnail...', 'loading');
-            thumbnailContainer.classList.add('hidden');
-            
-            try {
-                const result = await generateThumbnail(videoUrl, seekTime);
-                
-                thumbnailImage.src = result.thumbnail;
-                videoInfo.innerHTML = `
-                    <strong>Video Information:</strong><br>
-                    Dimensions: ${result.width} × ${result.height}px<br>
-                    Duration: ${result.duration ? result.duration.toFixed(1) + 's' : 'Unknown'}<br>
-                    Thumbnail captured at: ${seekTime}s
-                `;
-                
-                thumbnailContainer.classList.remove('hidden');
-                showStatus('Thumbnail generated successfully!', 'success');
-                
-            } catch (error) {
-                console.error('Error generating thumbnail:', error);
-                showStatus(error.message, 'error');
-            } finally {
-                generateBtn.disabled = false;
-            }
-        });
-
-        clearBtn.addEventListener('click', () => {
-            videoUrlInput.value = '';
-            timeSeekInput.value = '2';
-            hideStatus();
-            thumbnailContainer.classList.add('hidden');
-        });
-
-        // Allow Enter key to trigger generation
-        videoUrlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                generateBtn.click();
-            }
-        });
-    </script>
 </body>
-</html>
+</html> 
