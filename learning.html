@@ -21,19 +21,6 @@
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
-        /* Tooltip styles - using Tailwind classes */
-        .tooltip {
-            @apply relative;
-        }
-        .tooltip .tooltip-text {
-            @apply invisible absolute z-10 -bottom-2 left-1/2 -translate-x-1/2 px-2 py-1 text-xs whitespace-nowrap opacity-0 transition-opacity duration-200 bg-gray-800 text-white rounded;
-        }
-        .tooltip:hover .tooltip-text {
-            @apply visible opacity-100;
-        }
-        .tooltip .tooltip-text::after {
-            @apply content-[''] absolute top-full left-1/2 -ml-[5px] border-[5px] border-solid border-transparent border-t-gray-800;
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -58,6 +45,12 @@
                                 <input type="text" id="searchInput" placeholder="Search videos..." class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden">
                             </div>
                         </div>
+                        <button onclick="openAddVideoModal()" class="flex items-center gap-2 rounded-lg border border-blue-500 bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Add Video
+                        </button>
                         <div class="flex items-center gap-2">
                             <button onclick="filterByCategory('all')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -153,11 +146,34 @@
                 <div id="loadingState" class="hidden">
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         <!-- Loading placeholders -->
-                        <div class="video-card rounded-lg border border-gray-200 bg-white p-4">
-                            <div class="loading-shimmer mb-4 aspect-video rounded-lg"></div>
-                            <div class="loading-shimmer mb-2 h-6 w-3/4 rounded"></div>
-                            <div class="loading-shimmer mb-4 h-4 w-full rounded"></div>
-                            <div class="loading-shimmer h-8 w-1/3 rounded"></div>
+                        <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:border-blue-600">
+                            <div class="relative mb-4 aspect-video overflow-hidden rounded-lg">
+                                <img src="https://via.placeholder.com/300x200" alt="Loading" class="h-full w-full object-cover">
+                                <a href="#" target="_blank" 
+                                   class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity hover:opacity-100">
+                                    <svg class="h-16 w-16 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 5v14l11-7z"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                            <div class="flex flex-col flex-grow">
+                                <h3 class="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">Loading...</h3>
+                                <p class="mb-4 text-sm text-gray-600 line-clamp-3">Loading video content...</p>
+                            </div>
+                            <div class="mt-auto flex items-center justify-between gap-2">
+                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-xs font-medium whitespace-nowrap">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                    Learning
+                                </span>
+                                <a href="#" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
+                                    Procedure
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </a>
+                            </div>
                         </div>
                         <!-- Repeat loading placeholder 3 more times -->
                     </div>
@@ -231,6 +247,76 @@
     <div class="fixed bottom-4 right-4 z-50" id="notificationsContainer">
         <div class="flex flex-col gap-4">
             <!-- Notifications will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Add Video Modal -->
+    <div id="addVideoModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeAddVideoModal()"></div>
+            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div class="rounded-2xl border border-gray-200 bg-white">
+                    <div class="px-5 py-4 sm:px-6 sm:py-5">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-base font-medium text-gray-800">
+                                Add New Video
+                            </h3>
+                            <button type="button" onclick="closeAddVideoModal()" class="text-gray-400 hover:text-gray-500">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-5 space-y-6 border-t border-gray-100 sm:p-6">
+                        <form id="addVideoForm" onsubmit="submitNewVideo(event)">
+                            <div class="-mx-2.5 flex flex-wrap gap-y-5">
+                                <div class="w-full px-2.5">
+                                    <input type="text" id="videoTitle" placeholder="Video Title" required
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <textarea id="videoDescription" placeholder="Video Description" required rows="3"
+                                        class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <input type="url" id="videoUrl" placeholder="Video URL" required
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <input type="url" id="thumbnailUrl" placeholder="Thumbnail Image URL" required
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <select id="videoCategory" required
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                        <option value="">Select Category</option>
+                                        <option value="learning">Learning</option>
+                                        <option value="development">Development</option>
+                                        <option value="procedures">Procedures</option>
+                                        <option value="innovation">Innovation</option>
+                                    </select>
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <input type="url" id="procedureLink" placeholder="Procedure Document URL" required
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <button type="submit" class="w-full p-3 text-sm font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
+                                        Add Video
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -340,7 +426,7 @@
         function createVideoCard(video) {
             const categoryInfo = getCategoryInfo(video.category);
             return `
-                <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:scale-105">
+                <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:border-blue-600">
                     <div class="relative mb-4 aspect-video overflow-hidden rounded-lg">
                         <img src="${video.thumbnail}" alt="${video.title}" class="h-full w-full object-cover">
                         <a href="${video.videoUrl}" target="_blank" 
@@ -359,12 +445,11 @@
                             ${categoryInfo.icon}
                             ${categoryInfo.name}
                         </span>
-                        <a href="${video.procedureLink}" download class="tooltip flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
+                        <a href="${video.procedureLink}" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
                             Procedure
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
-                            <span class="tooltip-text">Download audit and official procedure</span>
                         </a>
                     </div>
                 </div>
@@ -650,6 +735,100 @@
                 }
             });
             filterVideos();
+        }
+
+        // Add Video Modal Functions
+        function openAddVideoModal() {
+            console.log('Opening modal...');
+            const modal = document.getElementById('addVideoModal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeAddVideoModal() {
+            console.log('Attempting to close modal...');
+            const modal = document.getElementById('addVideoModal');
+            if (modal) {
+                console.log('Modal element found, removing hidden class');
+                modal.classList.add('hidden');
+                document.getElementById('addVideoForm').reset();
+            } else {
+                console.log('Modal element not found!');
+            }
+        }
+
+        async function submitNewVideo(event) {
+            event.preventDefault();
+            console.log('Form submitted, closing modal...');
+            
+            const newVideo = {
+                title: document.getElementById('videoTitle').value,
+                description: document.getElementById('videoDescription').value,
+                videoUrl: document.getElementById('videoUrl').value,
+                thumbnail: document.getElementById('thumbnailUrl').value,
+                category: document.getElementById('videoCategory').value,
+                procedureLink: document.getElementById('procedureLink').value
+            };
+
+            // Close the form immediately
+            closeAddVideoModal();
+            console.log('Modal should be closed now');
+
+            try {
+                // First, get the current Excel file
+                const excelResponse = await fetch('https://cedt-confluence.net/confluence/download/attachments/2740868871/videos.xlsx?api=v2', {
+                    headers: {
+                        'X-Atlassian-Token': 'no-check'
+                    }
+                });
+
+                if (!excelResponse.ok) {
+                    throw new Error('Failed to fetch videos.xlsx file');
+                }
+
+                const excelBlob = await excelResponse.blob();
+                const reader = new FileReader();
+
+                reader.onload = async function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    // Add new video to the data
+                    jsonData.push(newVideo);
+
+                    // Update the existing sheet with new data
+                    XLSX.utils.sheet_add_json(firstSheet, jsonData, { skipHeader: true });
+
+                    // Convert to blob
+                    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                    // Upload the updated Excel file
+                    const formData = new FormData();
+                    formData.append('file', blob, 'videos.xlsx');
+
+                    const uploadResponse = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment', {
+                        method: 'POST',
+                        headers: {
+                            'X-Atlassian-Token': 'no-check'
+                        },
+                        body: formData
+                    });
+
+                    if (!uploadResponse.ok) {
+                        throw new Error('Failed to upload updated Excel file');
+                    }
+
+                    showNotification('Success', 'Video added successfully!', 'notification');
+                    fetchVideoData(); // Refresh the video list
+                };
+
+                reader.readAsArrayBuffer(excelBlob);
+            } catch (error) {
+                console.error('Error adding video:', error);
+                showNotification('Error', 'Failed to add video. Please try again.', 'error');
+            }
         }
 
         // Initialize the page
