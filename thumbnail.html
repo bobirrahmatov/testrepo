@@ -53,14 +53,15 @@
     <div class="p-4">
         <div class="rounded-2xl border border-gray-200 bg-white">
             <div class="px-5 py-4 sm:px-6 sm:py-5">
-                <h3 class="text-base font-medium text-gray-800">
+                <h3 class="!text-2xl font-medium text-gray-800">
                     Learning & Development Videos
                 </h3>
             </div>
             <div class="border-t border-gray-100 p-5 sm:p-6">
                 <!-- Search and Filter Section -->
-                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex flex-1 items-center gap-4">
+                <div class="mb-6 flex flex-col gap-4">
+                    <!-- Search and Add Video Row -->
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div class="w-[512px]">
                             <div class="relative">
                                 <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
@@ -68,47 +69,49 @@
                                         <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""></path>
                                     </svg>
                                 </span>
-                                <input type="text" id="searchInput" placeholder="Search videos..." class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden">
+                                <input type="text" id="searchInput" placeholder="Search videos..." class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] !text-lg text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden">
                             </div>
                         </div>
-                        <button onclick="openAddVideoModal()" class="flex items-center gap-2 rounded-lg border border-blue-500 bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <button onclick="openAddVideoModal()" class="flex items-center gap-2 rounded-lg border border-blue-500 bg-blue-500 px-3 py-2 !text-lg font-medium text-white hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             Add Video
                         </button>
-                        <div class="flex items-center gap-2">
-                            <button onclick="filterByCategory('all')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                                </svg>
-                                All
-                            </button>
-                            <button onclick="filterByCategory('learning')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                </svg>
-                                Learning
-                            </button>
-                            <button onclick="filterByCategory('development')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-                                </svg>
-                                Development
-                            </button>
-                            <button onclick="filterByCategory('procedures')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                Procedures
-                            </button>
-                            <button onclick="filterByCategory('innovation')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                                Innovation
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <!-- Category Filter Row -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="filterByCategory('all')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 !text-lg font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                            All
+                        </button>
+                        <button onclick="filterByCategory('learning')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 !text-lg font-medium text-blue-700 hover:bg-blue-100">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            Learning
+                        </button>
+                        <button onclick="filterByCategory('development')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 !text-lg font-medium text-emerald-700 hover:bg-emerald-100">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                            </svg>
+                            Development
+                        </button>
+                        <button onclick="filterByCategory('procedures')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 !text-lg font-medium text-rose-700 hover:bg-rose-100">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Procedures
+                        </button>
+                        <button onclick="filterByCategory('innovation')" class="category-filter-btn flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 !text-lg font-medium text-amber-700 hover:bg-amber-100">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Innovation
+                        </button>
                     </div>
                 </div>
 
@@ -132,25 +135,25 @@
                 <div id="paginationContainer" class="border-t border-gray-200 px-6 py-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-700">Show</span>
-                            <select id="itemsPerPage" class="rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700">
+                            <span class="!text-lg text-gray-700">Show</span>
+                            <select id="itemsPerPage" class="rounded-lg border border-gray-300 bg-white px-2 py-1 !text-lg text-gray-700">
                                 <option value="4">4</option>
                                 <option value="8" selected>8</option>
                                 <option value="12">12</option>
                                 <option value="16">16</option>
                             </select>
-                            <span class="text-sm text-gray-700">items per page</span>
+                            <span class="!text-lg text-gray-700">items per page</span>
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <button onclick="previousPage()" class="text-theme-sm shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5">
+                            <button onclick="previousPage()" class="!text-lg shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5">
                                 <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M2.58301 9.99868C2.58272 10.1909 2.65588 10.3833 2.80249 10.53L7.79915 15.5301C8.09194 15.8231 8.56682 15.8233 8.85981 15.5305C9.15281 15.2377 9.15297 14.7629 8.86018 14.4699L5.14009 10.7472L16.6675 10.7472C17.0817 10.7472 17.4175 10.4114 17.4175 9.99715C17.4175 9.58294 17.0817 9.24715 16.6675 9.24715L5.14554 9.24715L8.86017 5.53016C9.15297 5.23717 9.15282 4.7623 8.85983 4.4695C8.56684 4.1767 8.09197 4.17685 7.79917 4.46984L2.84167 9.43049C2.68321 9.568 2.58301 9.77087 2.58301 9.99715C2.58301 9.99766 2.58301 9.99817 2.58301 9.99868Z" fill=""></path>
                                 </svg>
                                 <span class="hidden sm:inline">Previous</span>
                             </button>
 
-                            <span class="block text-sm font-medium text-gray-700 sm:hidden">
+                            <span class="block !text-lg font-medium text-gray-700 sm:hidden">
                                 Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
                             </span>
 
@@ -158,7 +161,7 @@
                                 <!-- Pagination will be dynamically added here -->
                             </ul>
 
-                            <button onclick="nextPage()" class="text-theme-sm shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5">
+                            <button onclick="nextPage()" class="!text-lg shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5">
                                 <span class="hidden sm:inline">Next</span>
                                 <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M17.4175 9.9986C17.4178 10.1909 17.3446 10.3832 17.198 10.53L12.2013 15.5301C11.9085 15.8231 11.4337 15.8233 11.1407 15.5305C10.8477 15.2377 10.8475 14.7629 11.1403 14.4699L14.8604 10.7472L3.33301 10.7472C2.91879 10.7472 2.58301 10.4114 2.58301 9.99715C2.58301 9.58294 2.91879 9.24715 3.33301 9.24715L14.8549 9.24715L11.1403 5.53016C10.8475 5.23717 10.8477 4.7623 11.1407 4.4695C11.4336 4.1767 11.9085 4.17685 12.2013 4.46984L17.1588 9.43049C17.3173 9.568 17.4175 9.77087 17.4175 9.99715C17.4175 9.99763 17.4175 9.99812 17.4175 9.9986Z" fill=""></path>
@@ -175,23 +178,23 @@
                         <div class="video-card flex flex-col rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 ease-in-out hover:border-blue-600">
                             <div class="relative mb-4 aspect-video overflow-hidden rounded-lg bg-gray-100">
                                 <div class="absolute inset-0 flex items-center justify-center">
-                                    <div class="text-gray-400 text-sm">SharePoint Video Loading...</div>
+                                    <div class="text-gray-400 !text-lg">SharePoint Video Loading...</div>
                                 </div>
                             </div>
                             <div class="flex flex-col flex-grow">
                                 <h3 class="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">Loading SharePoint Video...</h3>
-                                <p class="mb-4 text-sm text-gray-600 line-clamp-3">Loading embedded video content from SharePoint...</p>
+                                <p class="mb-4 !text-lg text-gray-600 line-clamp-3">Loading embedded video content from SharePoint...</p>
                             </div>
                             <div class="mt-auto flex items-center justify-between gap-2">
-                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-xs font-medium whitespace-nowrap">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 !text-lg font-medium whitespace-nowrap">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                     </svg>
                                     Learning
                                 </span>
-                                <a href="#" target="_blank" class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
+                                <a href="#" target="_blank" class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 !text-lg font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
                                     Procedure
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                     </svg>
                                 </a>
@@ -210,18 +213,18 @@
                             </div>
                             <div class="flex flex-col flex-grow">
                                 <h3 class="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">Loading...</h3>
-                                <p class="mb-4 text-sm text-gray-600 line-clamp-3">Loading video content...</p>
+                                <p class="mb-4 !text-lg text-gray-600 line-clamp-3">Loading video content...</p>
                             </div>
                             <div class="mt-auto flex items-center justify-between gap-2">
-                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-xs font-medium whitespace-nowrap">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 !text-lg font-medium whitespace-nowrap">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                     </svg>
                                     Learning
                                 </span>
-                                <a href="#" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
+                                <a href="#" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 !text-lg font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
                                     Procedure
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                     </svg>
                                 </a>
@@ -240,18 +243,18 @@
                             </div>
                             <div class="flex flex-col flex-grow">
                                 <h3 class="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">Loading...</h3>
-                                <p class="mb-4 text-sm text-gray-600 line-clamp-3">Loading video content...</p>
+                                <p class="mb-4 !text-lg text-gray-600 line-clamp-3">Loading video content...</p>
                             </div>
                             <div class="mt-auto flex items-center justify-between gap-2">
-                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-xs font-medium whitespace-nowrap">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 !text-lg font-medium whitespace-nowrap">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                     </svg>
                                     Learning
                                 </span>
-                                <a href="#" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
+                                <a href="#" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 !text-lg font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
                                     Procedure
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                     </svg>
                                 </a>
@@ -270,18 +273,18 @@
                             </div>
                             <div class="flex flex-col flex-grow">
                                 <h3 class="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">Loading...</h3>
-                                <p class="mb-4 text-sm text-gray-600 line-clamp-3">Loading video content...</p>
+                                <p class="mb-4 !text-lg text-gray-600 line-clamp-3">Loading video content...</p>
                             </div>
                             <div class="mt-auto flex items-center justify-between gap-2">
-                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-xs font-medium whitespace-nowrap">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <span class="category-badge flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 !text-lg font-medium whitespace-nowrap">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                     </svg>
                                     Learning
                                 </span>
-                                <a href="#" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
+                                <a href="#" download class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 !text-lg font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
                                     Procedure
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                     </svg>
                                 </a>
@@ -294,8 +297,8 @@
     </div>
 
     <!-- Feedback Button -->
-    <button onclick="toggleFeedbackForm()" class="fixed left-4 bottom-4 z-50 flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <button onclick="toggleFeedbackForm()" class="fixed left-4 bottom-4 z-50 flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 !text-lg font-medium text-white hover:bg-blue-700">
+        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-3l-4 4z"></path>
         </svg>
         Feedback
@@ -308,11 +311,11 @@
             <div class="rounded-2xl border border-gray-200 bg-white">
                 <div class="px-5 py-4 sm:px-6 sm:py-5">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-base font-medium text-gray-800">
+                        <h3 class="!text-2xl font-medium text-gray-800">
                             Feedback Form
                         </h3>
                         <button onclick="toggleFeedbackForm()" class="text-gray-400 hover:text-gray-500">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
@@ -323,12 +326,12 @@
                         <div class="-mx-2.5 flex flex-wrap gap-y-5">
                             <div class="w-full px-2.5">
                                 <input type="text" id="feedbackName" placeholder="Your Name (Optional)"
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                             </div>
 
                             <div class="w-full px-2.5">
                                 <select id="feedbackType" required
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                                     <option value="">Select Feedback Type</option>
                                     <option value="suggestion">Suggestion</option>
                                     <option value="bug">Bug Report</option>
@@ -339,11 +342,11 @@
 
                             <div class="w-full px-2.5">
                                 <textarea id="feedbackMessage" placeholder="Your Feedback" required rows="4"
-                                    class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                                    class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
                             </div>
 
                             <div class="w-full px-2.5">
-                                <button type="submit" class="w-full p-3 text-sm font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
+                                <button type="submit" class="w-full p-3 !text-lg font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
                                     Submit Feedback
                                 </button>
                             </div>
@@ -369,11 +372,11 @@
                 <div class="rounded-2xl border border-gray-200 bg-white">
                     <div class="px-5 py-4 sm:px-6 sm:py-5">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-base font-medium text-gray-800">
+                            <h3 class="!text-2xl font-medium text-gray-800">
                                 Add New Video
                             </h3>
                             <button type="button" onclick="closeAddVideoModal()" class="text-gray-400 hover:text-gray-500">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>
@@ -384,24 +387,24 @@
                             <div class="-mx-2.5 flex flex-wrap gap-y-5">
                                 <div class="w-full px-2.5">
                                     <input type="text" id="videoTitle" placeholder="Video Title" required
-                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                                 </div>
 
                                 <div class="w-full px-2.5">
                                     <textarea id="videoDescription" placeholder="Video Description" required rows="3"
-                                        class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                                        class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
                                 </div>
 
                                 <div class="w-full px-2.5">
                                     <textarea id="videoUrl" placeholder="SharePoint Video Embed Code (e.g., <iframe src='...' width='640' height='360'></iframe>) or Video URL" required rows="4"
-                                        class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
-                                    <p class="mt-1 text-xs text-gray-500">Paste the SharePoint embed code for direct video embedding. The video will display automatically.</p>
-                                    <p class="mt-1 text-xs text-blue-600">💡 To get SharePoint embed code: Open your video → Click "..." → Select "Embed" → Copy the iframe code</p>
+                                        class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                                    <p class="mt-1 !text-lg text-gray-500">Paste the SharePoint embed code for direct video embedding. The video will display automatically.</p>
+                                    <p class="mt-1 !text-lg text-blue-600">💡 To get SharePoint embed code: Open your video → Click "..." → Select "Embed" → Copy the iframe code</p>
                                 </div>
 
                                 <div class="w-full px-2.5">
                                     <select id="videoCategory" required
-                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                                         <option value="">Select Category</option>
                                         <option value="learning">Learning</option>
                                         <option value="development">Development</option>
@@ -412,11 +415,11 @@
 
                                 <div class="w-full px-2.5">
                                     <input type="url" id="procedureLink" placeholder="Procedure Document URL" required
-                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                                 </div>
 
                                 <div class="w-full px-2.5">
-                                    <button type="submit" class="w-full p-3 text-sm font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
+                                    <button type="submit" class="w-full p-3 !text-lg font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
                                         Add Video
                                     </button>
                                 </div>
@@ -493,35 +496,35 @@
                 'learning': {
                     name: 'Learning',
                     color: 'bg-blue-50 text-blue-700 border border-blue-200',
-                    icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                     </svg>`
                 },
                 'development': {
                     name: 'Development',
                     color: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                    icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                     </svg>`
                 },
                 'procedures': {
                     name: 'Procedures',
                     color: 'bg-rose-50 text-rose-700 border border-rose-200',
-                    icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>`
                 },
                 'innovation': {
                     name: 'Innovation',
                     color: 'bg-amber-50 text-amber-700 border border-amber-200',
-                    icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>`
                 },
                 'others': {
                     name: 'Others',
                     color: 'bg-slate-50 text-slate-700 border border-slate-200',
-                    icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    icon: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
                     </svg>`
                 }
@@ -561,8 +564,8 @@
                                 <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                                 </svg>
-                                <p class="text-sm text-gray-500">SharePoint Embed Code Needed</p>
-                                <a href="${video.videoUrl}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800">View Video</a>
+                                <p class="!text-lg text-gray-500">SharePoint Embed Code Needed</p>
+                                <a href="${video.videoUrl}" target="_blank" class="!text-lg text-blue-600 hover:text-blue-800">View Video</a>
                             </div>
                         </div>
                     </div>
@@ -574,16 +577,16 @@
                     ${videoContent}
                     <div class="flex flex-col flex-grow">
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">${video.title}</h3>
-                        <p class="mb-4 text-sm text-gray-600 line-clamp-3">${video.description}</p>
+                        <p class="mb-4 !text-lg text-gray-600 line-clamp-3">${video.description}</p>
                     </div>
                     <div class="mt-auto flex items-center justify-between gap-2">
-                        <span class="category-badge flex items-center gap-1 rounded-full ${categoryInfo.color} px-3 py-1 text-xs font-medium whitespace-nowrap">
+                        <span class="category-badge flex items-center gap-1 rounded-full ${categoryInfo.color} px-3 py-1 !text-lg font-medium whitespace-nowrap">
                             ${categoryInfo.icon}
                             ${categoryInfo.name}
                         </span>
-                        <a href="${video.procedureLink}" target="_blank" class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
+                        <a href="${video.procedureLink}" target="_blank" class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 !text-lg font-medium !text-white hover:bg-blue-600 transition-colors duration-200 whitespace-nowrap">
                             Procedure
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
                         </a>
@@ -655,8 +658,8 @@
             const a = document.createElement('a');
             a.href = '#';
             a.className = pageNum === currentPage 
-                ? 'bg-brand-500/[0.08] text-theme-sm text-brand-500 hover:bg-brand-500/[0.08] hover:text-brand-500 flex h-10 w-10 items-center justify-center rounded-lg font-medium'
-                : 'text-theme-sm hover:bg-brand-500/[0.08] hover:text-brand-500 flex h-10 w-10 items-center justify-center rounded-lg font-medium text-gray-700';
+                ? 'bg-brand-500/[0.08] !text-lg text-brand-500 hover:bg-brand-500/[0.08] hover:text-brand-500 flex h-10 w-10 items-center justify-center rounded-lg font-medium'
+                : '!text-lg hover:bg-brand-500/[0.08] hover:text-brand-500 flex h-10 w-10 items-center justify-center rounded-lg font-medium text-gray-700';
             a.textContent = pageNum;
             a.onclick = (e) => {
                 e.preventDefault();
@@ -669,7 +672,7 @@
 
         function addEllipsis() {
             const li = document.createElement('li');
-            li.className = 'text-theme-sm flex h-10 w-10 items-center justify-center text-gray-700';
+            li.className = '!text-lg flex h-10 w-10 items-center justify-center text-gray-700';
             li.textContent = '...';
             pagination.appendChild(li);
         }
@@ -733,14 +736,14 @@
                     : 'text-green-600';
 
             const icon = type === 'error'
-                ? `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                ? `<svg class="h-7 w-7 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>`
                 : type === 'message'
-                    ? `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    ? `<svg class="h-7 w-7 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                     </svg>`
-                    : `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    : `<svg class="h-7 w-7 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>`;
 
@@ -751,11 +754,11 @@
                     ${icon}
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-medium text-gray-900">${title}</h4>
-                    <p class="text-sm text-gray-500">${message}</p>
+                    <h4 class="!text-lg font-medium text-gray-900">${title}</h4>
+                    <p class="!text-lg text-gray-500">${message}</p>
                 </div>
                 <button class="text-gray-400 hover:text-gray-500 close-notification">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -855,18 +858,18 @@
             const buttons = document.querySelectorAll('.category-filter-btn');
             buttons.forEach(btn => {
                 // Reset all buttons to default state
-                btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800';
+                btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 !text-lg font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800';
                 
                 // Apply category-specific styling if this is the selected button
                 if (btn.textContent.trim().toLowerCase() === category) {
                     if (category === 'learning') {
-                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100';
+                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 !text-lg font-medium text-blue-700 hover:bg-blue-100';
                     } else if (category === 'development') {
-                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100';
+                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 !text-lg font-medium text-emerald-700 hover:bg-emerald-100';
                     } else if (category === 'procedures') {
-                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100';
+                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 !text-lg font-medium text-rose-700 hover:bg-rose-100';
                     } else if (category === 'innovation') {
-                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100';
+                        btn.className = 'category-filter-btn flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 !text-lg font-medium text-amber-700 hover:bg-amber-100';
                     }
                 }
             });
