@@ -178,7 +178,21 @@
                     </div>
 
                     <!-- View Switching Slider -->
-                    <div class="rounded-xl border border-gray-200 p-6" x-data="{ activeView: 'kanban' }" x-init="$watch('activeView', async value => { console.log('View changed to:', value); if (value === 'metrics') { setTimeout(async () => await updateMetrics(false), 200); } else if (value === 'calendar') { setTimeout(() => updateCalendar(), 200); } })">
+                    <div class="rounded-xl border border-gray-200 p-6" x-data="{ activeView: 'kanban' }" x-init="$watch('activeView', async (value) => { 
+                        console.log('View changed to:', value); 
+                        if (value === 'metrics') { 
+                            console.log('Switching to metrics view, updating charts...');
+                            setTimeout(async () => {
+                                try {
+                                    await updateMetrics(true);
+                                } catch (error) {
+                                    console.error('Error updating metrics:', error);
+                                }
+                            }, 300); 
+                        } else if (value === 'calendar') { 
+                            setTimeout(() => updateCalendar(), 200); 
+                        }
+                    })">
                         <div class="border-b border-gray-200">
                             <nav class="-mb-px flex space-x-2 overflow-x-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar]:h-1.5">
                                 <button class="inline-flex items-center gap-2 border-b-2 px-2.5 py-2 !text-md font-medium transition-colors duration-200 ease-in-out" 
@@ -341,6 +355,20 @@
                                 
                                 <!-- Metrics Dashboard -->
                                 <div class="space-y-6">
+                                    <!-- Metrics Header with Refresh Button -->
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h2 class="text-xl font-semibold text-gray-900">📊 Task Metrics Dashboard</h2>
+                                            <p class="text-sm text-gray-500 mt-1">Live data from Confluence tasks.json</p>
+                                        </div>
+                                        <button id="refresh-metrics" class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 !text-md font-medium text-white hover:bg-blue-600 transition-colors">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            Refresh Metrics
+                                        </button>
+                                    </div>
+                                    
                                     <!-- Summary Cards -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -852,500 +880,59 @@
     </div>
 
     <script>
-        // Fallback dummy data
-        const FALLBACK_TASKS = [
-            {
-                "id": "1",
-                "title": "Implement User Authentication System",
-                "description": "Create a secure login and registration system with JWT tokens and password encryption. Include email verification and password reset functionality.",
-                "tag": "blue",
-                "priority": "high",
-                "assignedUser": "User 1",
-                "submittedBy": "User 5",
-                "startDate": "2024-01-15",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 6);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "progress",
-                "createdAt": "2024-01-15T09:00:00.000Z",
-                "updatedAt": "2024-01-20T14:30:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705310400000",
-                        "timestamp": "2024-01-15T09:00:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Task created",
-                        "updatedBy": "User 5"
-                    },
-                    {
-                        "id": "lc_1705742400000",
-                        "timestamp": "2024-01-20T14:30:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Started working on authentication backend. Set up JWT library and basic user model.",
-                        "updatedBy": "User 1"
-                    }
-                ]
-            },
-            {
-                "id": "2",
-                "title": "Fix Shopping Cart Bug",
-                "description": "Items are not being removed from cart when quantity is set to 0. Users are reporting issues with checkout process.",
-                "tag": "red",
-                "priority": "urgent",
-                "assignedUser": "User 2",
-                "submittedBy": "User 3",
-                "startDate": "2024-01-22",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 6);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "done",
-                "createdAt": "2024-01-22T08:15:00.000Z",
-                "updatedAt": "2024-01-24T16:45:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705915200000",
-                        "timestamp": "2024-01-22T08:15:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Urgent bug reported by customer support",
-                        "updatedBy": "User 3"
-                    },
-                    {
-                        "id": "lc_1705999200000",
-                        "timestamp": "2024-01-23T10:30:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Identified the issue in cart.js. Working on fix.",
-                        "updatedBy": "User 2"
-                    },
-                    {
-                        "id": "lc_1706112000000",
-                        "timestamp": "2024-01-24T16:45:00.000Z",
-                        "fromStatus": "progress",
-                        "toStatus": "done",
-                        "updateType": "completion",
-                        "comments": "Bug fixed. Added unit tests. Completed and deployed.",
-                        "updatedBy": "User 2"
-                    }
-                ]
-            },
-            {
-                "id": "3",
-                "title": "Redesign Dashboard Layout",
-                "description": "Update the main dashboard to use the new design system. Improve user experience and add dark mode support.",
-                "tag": "purple",
-                "priority": "medium",
-                "assignedUser": "User 3",
-                "submittedBy": "User 4",
-                "startDate": "2024-01-18",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 4);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "review",
-                "createdAt": "2024-01-18T11:20:00.000Z",
-                "updatedAt": "2024-01-18T11:20:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705572000000",
-                        "timestamp": "2024-01-18T11:20:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Task created - part of Q1 design refresh",
-                        "updatedBy": "User 4"
-                    },
-                    {
-                        "id": "lc_1705572001000",
-                        "timestamp": "2024-01-25T11:20:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Started wireframes and design mockups",
-                        "updatedBy": "User 3"
-                    },
-                    {
-                        "id": "lc_1705572002000",
-                        "timestamp": "2024-02-01T11:20:00.000Z",
-                        "fromStatus": "progress",
-                        "toStatus": "review",
-                        "updateType": "review",
-                        "comments": "Design completed, ready for stakeholder review",
-                        "updatedBy": "User 3"
-                    }
-                ]
-            },
-            {
-                "id": "4",
-                "title": "API Performance Optimization",
-                "description": "Optimize database queries and implement caching to improve API response times by 50%. Focus on user data endpoints.",
-                "tag": "green",
-                "priority": "high",
-                "assignedUser": "User 1",
-                "submittedBy": "User 2",
-                "startDate": "2024-01-10",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 3);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "done",
-                "createdAt": "2024-01-10T09:30:00.000Z",
-                "updatedAt": "2024-01-25T13:15:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1704880200000",
-                        "timestamp": "2024-01-10T09:30:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Performance issues reported in production",
-                        "updatedBy": "User 2"
-                    },
-                    {
-                        "id": "lc_1705054800000",
-                        "timestamp": "2024-01-12T14:20:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Started analysis of slow queries. Identified bottlenecks in user data retrieval.",
-                        "updatedBy": "User 1"
-                    },
-                    {
-                        "id": "lc_1705659600000",
-                        "timestamp": "2024-01-19T16:40:00.000Z",
-                        "fromStatus": "progress",
-                        "toStatus": "review",
-                        "updateType": "review",
-                        "comments": "Implemented Redis caching and optimized 5 key queries. Ready for testing.",
-                        "updatedBy": "User 1"
-                    },
-                    {
-                        "id": "lc_1706181300000",
-                        "timestamp": "2024-01-25T13:15:00.000Z",
-                        "fromStatus": "review",
-                        "toStatus": "done",
-                        "updateType": "completion",
-                        "comments": "Performance tests passed. 60% improvement in response times. Deployed to production.",
-                        "updatedBy": "User 2"
-                    }
-                ]
-            },
-            {
-                "id": "5",
-                "title": "Update User Documentation",
-                "description": "Review and update all user-facing documentation. Add new features documentation and improve existing content clarity.",
-                "tag": "yellow",
-                "priority": "low",
-                "assignedUser": "User 4",
-                "submittedBy": "User 1",
-                "startDate": "2024-01-25",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 2);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "todo",
-                "createdAt": "2024-01-25T10:00:00.000Z",
-                "updatedAt": "2024-01-25T10:00:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1706176800000",
-                        "timestamp": "2024-01-25T10:00:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Documentation needs refresh for new features",
-                        "updatedBy": "User 1"
-                    }
-                ]
-            },
-            {
-                "id": "6",
-                "title": "Implement Real-time Notifications",
-                "description": "Add WebSocket support for real-time notifications. Include browser notifications and in-app notification center.",
-                "tag": "blue",
-                "priority": "medium",
-                "assignedUser": "User 5",
-                "submittedBy": "User 3",
-                "startDate": "2024-01-20",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 1);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "progress",
-                "createdAt": "2024-01-20T13:45:00.000Z",
-                "updatedAt": "2024-01-23T09:20:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705757100000",
-                        "timestamp": "2024-01-20T13:45:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Feature requested by multiple users",
-                        "updatedBy": "User 3"
-                    },
-                    {
-                        "id": "lc_1705999200000",
-                        "timestamp": "2024-01-23T09:20:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Set up WebSocket server. Working on client-side implementation.",
-                        "updatedBy": "User 5"
-                    }
-                ]
-            },
-            {
-                "id": "7",
-                "title": "Security Audit Report Fixes",
-                "description": "Address security vulnerabilities identified in the recent audit. Includes XSS prevention and SQL injection protection.",
-                "tag": "red",
-                "priority": "urgent",
-                "assignedUser": "User 2",
-                "submittedBy": "User 5",
-                "startDate": "2024-01-24",
-                "dueDate": (() => {
-                    const date = new Date();
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "todo",
-                "createdAt": "2024-01-24T14:30:00.000Z",
-                "updatedAt": "2024-01-24T14:30:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1706107800000",
-                        "timestamp": "2024-01-24T14:30:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Security audit completed - 3 high priority issues found",
-                        "updatedBy": "User 5"
-                    }
-                ]
-            },
-            {
-                "id": "8",
-                "title": "Mobile App Icon Design",
-                "description": "Create new app icons for iOS and Android. Include various sizes and adaptive icons for Android 12+.",
-                "tag": "purple",
-                "priority": "low",
-                "assignedUser": "User 3",
-                "submittedBy": "User 4",
-                "startDate": "2024-01-15",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 3);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "review",
-                "createdAt": "2024-01-15T16:20:00.000Z",
-                "updatedAt": "2024-01-24T11:30:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705335600000",
-                        "timestamp": "2024-01-15T16:20:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "New brand guidelines require updated app icons",
-                        "updatedBy": "User 4"
-                    },
-                    {
-                        "id": "lc_1705737600000",
-                        "timestamp": "2024-01-20T08:40:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Started initial concepts. Created 5 different design variations.",
-                        "updatedBy": "User 3"
-                    },
-                    {
-                        "id": "lc_1706091000000",
-                        "timestamp": "2024-01-24T11:30:00.000Z",
-                        "fromStatus": "progress",
-                        "toStatus": "review",
-                        "updateType": "review",
-                        "comments": "Completed all icon sizes. Ready for stakeholder review.",
-                        "updatedBy": "User 3"
-                    }
-                ]
-            },
-            {
-                "id": "9",
-                "title": "Database Migration Script",
-                "description": "Create migration script to update user table schema. Add new fields for enhanced user profiles.",
-                "tag": "green",
-                "priority": "medium",
-                "assignedUser": "User 1",
-                "submittedBy": "User 2",
-                "startDate": "2024-01-22",
-                "dueDate": "2024-12-22",
-                "column": "progress",
-                "createdAt": "2024-01-22T12:15:00.000Z",
-                "updatedAt": "2024-01-24T15:45:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705930500000",
-                        "timestamp": "2024-01-22T12:15:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Database schema changes needed for new features",
-                        "updatedBy": "User 2"
-                    },
-                    {
-                        "id": "lc_1706115900000",
-                        "timestamp": "2024-01-24T15:45:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Started writing migration script. Testing on development database.",
-                        "updatedBy": "User 1"
-                    }
-                ]
-            },
-            {
-                "id": "10",
-                "title": "Customer Support Chat Integration",
-                "description": "Integrate third-party chat widget for customer support. Configure automated responses and routing rules.",
-                "tag": "yellow",
-                "priority": "none",
-                "assignedUser": "User 4",
-                "submittedBy": "User 3",
-                "startDate": "2024-01-18",
-                "dueDate": null,
-                "column": "todo",
-                "createdAt": "2024-01-18T09:45:00.000Z",
-                "updatedAt": "2024-01-18T09:45:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705566300000",
-                        "timestamp": "2024-01-18T09:45:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Customer success team requested better support tools",
-                        "updatedBy": "User 3"
-                    }
-                ]
-            },
-            {
-                "id": "12",
-                "title": "Payment Gateway Integration",
-                "description": "Integrate Stripe payment processing. Support for subscriptions, one-time payments, and refunds.",
-                "tag": "green",
-                "priority": "high",
-                "assignedUser": "User 2",
-                "submittedBy": "User 5",
-                "startDate": "2024-01-12",
-                "dueDate": (() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - 1);
-                    return date.toISOString().split('T')[0];
-                })(),
-                "column": "done",
-                "createdAt": "2024-01-12T10:30:00.000Z",
-                "updatedAt": "2024-01-26T16:00:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1705053000000",
-                        "timestamp": "2024-01-12T10:30:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Critical for monetization strategy",
-                        "updatedBy": "User 5"
-                    },
-                    {
-                        "id": "lc_1705312800000",
-                        "timestamp": "2024-01-15T15:20:00.000Z",
-                        "fromStatus": "todo",
-                        "toStatus": "progress",
-                        "updateType": "progress",
-                        "comments": "Set up Stripe account. Working on webhook handlers.",
-                        "updatedBy": "User 2"
-                    },
-                    {
-                        "id": "lc_1705830000000",
-                        "timestamp": "2024-01-21T11:00:00.000Z",
-                        "fromStatus": "progress",
-                        "toStatus": "review",
-                        "updateType": "review",
-                        "comments": "Payment flow complete. Testing with sandbox environment.",
-                        "updatedBy": "User 2"
-                    },
-                    {
-                        "id": "lc_1706284800000",
-                        "timestamp": "2024-01-26T16:00:00.000Z",
-                        "fromStatus": "review",
-                        "toStatus": "done",
-                        "updateType": "completion",
-                        "comments": "All tests passed. Live payments are working correctly.",
-                        "updatedBy": "User 5"
-                    }
-                ]
-            },
-            {
-                "id": "11",
-                "title": "Email Template System",
-                "description": "Build dynamic email template system with WYSIWYG editor. Support for personalization and A/B testing.",
-                "tag": "blue",
-                "priority": "none",
-                "assignedUser": "User 5",
-                "submittedBy": "User 1",
-                "startDate": "2024-02-01",
-                "dueDate": null,
-                "column": "todo",
-                "createdAt": "2024-01-25T14:20:00.000Z",
-                "updatedAt": "2024-01-25T14:20:00.000Z",
-                "lifecycle": [
-                    {
-                        "id": "lc_1706192400000",
-                        "timestamp": "2024-01-25T14:20:00.000Z",
-                        "fromStatus": null,
-                        "toStatus": "todo",
-                        "updateType": "creation",
-                        "comments": "Marketing team needs better email capabilities",
-                        "updatedBy": "User 1"
-                    }
-                ]
-            }
-        ];
-
         // Function to fetch tasks from Confluence (with fallback to dummy data)
         let hasShownOfflineNotification = false; // Flag to ensure offline notification is shown only once
 
         async function fetchTasks() {
             try {
-                const response = await fetch(`https://cedt-confluence.net/confluence/download/attachments/2740868871/tasks.json?api=v2`);
+                console.log('Fetching tasks from Confluence...');
+                const url = `https://cedt-confluence.net/confluence/download/attachments/2740868871/tasks.json?api=v2`;
+                console.log('Request URL:', url);
+                
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                console.log('Response OK:', response.ok);
+                
                 if (!response.ok) {
                     // Log the error and throw it to be caught by the caller
                     const errorText = await response.text(); // Attempt to get more error details
                     console.error(`Failed to load data: ${response.status} ${response.statusText}`, errorText);
-                    throw new Error(`Failed to load data: ${response.status} ${response.statusText}. Server response: ${errorText}`);
+                    throw new Error(`Failed to load data from Confluence: ${response.status} ${response.statusText}. Server response: ${errorText}`);
                 }
+                
                 const data = await response.json();
-                return data.tasks || []; // Return empty array if tasks are not present
+                console.log('Raw data received:', data);
+                
+                const tasks = data.tasks || []; // Return empty array if tasks are not present
+                console.log('Tasks extracted:', tasks);
+                console.log('Number of tasks:', tasks.length);
+                
+                if (tasks.length > 0) {
+                    console.log('Sample task:', tasks[0]);
+                } else {
+                    console.log('No tasks found in response');
+                }
+                
+                return tasks;
             } catch (error) {
                 // Log the error and re-throw it to be caught by the caller
                 console.error('Error fetching tasks from Confluence:', error);
-                // No longer show 'Using offline demo data' as there's no fallback.
-                // The caller (loadTasksFromConfluence) will handle showing an error to the user.
-                throw error; 
+                console.error('Error details:', {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack
+                });
+                
+                // Show more specific error information
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    throw new Error('Unable to connect to Confluence. Please check your internet connection and ensure the Confluence server is accessible.');
+                } else if (error.message.includes('404')) {
+                    throw new Error('Tasks data file not found on Confluence. Please ensure tasks.json exists.');
+                } else if (error.message.includes('403') || error.message.includes('401')) {
+                    throw new Error('Access denied. Please check your permissions to access the Confluence page.');
+                } else {
+                    throw error; // Re-throw the original error if it's not a common network issue
+                }
             }
         }
 
@@ -1388,59 +975,6 @@
 
         // Initialize view switching
         document.addEventListener('DOMContentLoaded', async function () {
-            // View switching fallback
-            window.switchView = function(viewName) {
-                console.log('Switching to view:', viewName);
-                
-                // Hide all views
-                const kanbanView = document.querySelector('div[x-show="activeView === \'kanban\'"]');
-                const tableView = document.querySelector('div[x-show="activeView === \'table\'"]');
-                const metricsView = document.querySelector('div[x-show="activeView === \'metrics\'"]');
-                const calendarView = document.querySelector('div[x-show="activeView === \'calendar\'"]');
-                
-                if (kanbanView) kanbanView.style.display = 'none';
-                if (tableView) tableView.style.display = 'none';
-                if (metricsView) metricsView.style.display = 'none';
-                if (calendarView) calendarView.style.display = 'none';
-                
-                // Show selected view
-                switch(viewName) {
-                    case 'kanban':
-                        if (kanbanView) kanbanView.style.display = 'block';
-                        break;
-                    case 'table':
-                        if (tableView) tableView.style.display = 'block';
-                        // Update table data when switching to table view
-                        setTimeout(async () => await updateTableView(), 100);
-                        break;
-                    case 'metrics':
-                        if (metricsView) metricsView.style.display = 'block';
-                        // setTimeout(() => updateMetrics(false), 200); // Removed: Alpine watcher handles this
-                        break;
-                    case 'calendar':
-                        if (calendarView) calendarView.style.display = 'block';
-                        // Initialize calendar with default month view if not already set
-                        if (!window.calendarInitialized) {
-                            currentCalendarView = 'month';
-                            currentCalendarDate = new Date();
-                            window.calendarInitialized = true;
-                        }
-                        break;
-                }
-                
-                // Update button states
-                document.querySelectorAll('nav button').forEach(btn => {
-                    btn.classList.remove('text-blue-500', 'border-blue-500');
-                    btn.classList.add('text-gray-500', 'border-transparent');
-                });
-                
-                const activeButton = document.querySelector(`nav button[onclick="switchView('${viewName}')"]`);
-                if (activeButton) {
-                    activeButton.classList.remove('text-gray-500', 'border-transparent');
-                    activeButton.classList.add('text-blue-500', 'border-blue-500');
-                }
-            };
-            
             // Initialize with kanban view
             window.switchView('kanban');
             
@@ -1450,6 +984,36 @@
             // Add refresh button functionality
             document.getElementById('refresh-data').addEventListener('click', async function() {
                 loadTasksFromConfluence();
+            });
+
+            // Add refresh metrics button functionality
+            document.getElementById('refresh-metrics').addEventListener('click', async function() {
+                console.log('Manual metrics refresh triggered');
+                try {
+                    this.disabled = true;
+                    this.innerHTML = `
+                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Refreshing...
+                    `;
+                    
+                    await updateMetrics(true);
+                    
+                    showNotification('Success', 'Metrics refreshed successfully', 'notification');
+                } catch (error) {
+                    console.error('Manual metrics refresh failed:', error);
+                    showNotification('Error', 'Failed to refresh metrics data', 'error');
+                } finally {
+                    this.disabled = false;
+                    this.innerHTML = `
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh Metrics
+                    `;
+                }
             });
 
             // Function to load tasks from Confluence
@@ -1708,15 +1272,27 @@
         let charts = {};
 
         // Function to update metrics
-        async function updateMetrics(showNotifications = false) {
+        async function updateMetrics(showNotifications = true) {
             try {
+                console.log('Starting metrics update...');
                 const tasks = await fetchTasks();
-                console.log('Updating metrics with', tasks.length, 'tasks');
+                console.log('Fetched tasks for metrics:', tasks);
+                console.log('Number of tasks loaded:', tasks.length);
+                
+                if (!tasks) {
+                    console.error('Tasks is null or undefined');
+                    throw new Error('No tasks data received');
+                }
                 
                 // Update summary cards
-                document.getElementById('total-tasks-metric').textContent = tasks.length;
-                document.getElementById('completed-tasks-metric').textContent = tasks.filter(t => t.column === 'done').length;
-                document.getElementById('progress-tasks-metric').textContent = tasks.filter(t => t.column === 'progress').length;
+                const totalTasksElement = document.getElementById('total-tasks-metric');
+                const completedTasksElement = document.getElementById('completed-tasks-metric');
+                const progressTasksElement = document.getElementById('progress-tasks-metric');
+                const overdueTasksElement = document.getElementById('overdue-tasks-metric');
+                
+                if (totalTasksElement) totalTasksElement.textContent = tasks.length;
+                if (completedTasksElement) completedTasksElement.textContent = tasks.filter(t => t.column === 'done').length;
+                if (progressTasksElement) progressTasksElement.textContent = tasks.filter(t => t.column === 'progress').length;
                 
                 // Calculate overdue tasks
                 const overdueTasks = tasks.filter(task => {
@@ -1725,10 +1301,18 @@
                     const dueDate = new Date(task.dueDate);
                     return dueDate < today && task.column !== 'done';
                 });
-                document.getElementById('overdue-tasks-metric').textContent = overdueTasks.length;
+                if (overdueTasksElement) overdueTasksElement.textContent = overdueTasks.length;
+
+                console.log('Summary cards updated:', {
+                    total: tasks.length,
+                    completed: tasks.filter(t => t.column === 'done').length,
+                    progress: tasks.filter(t => t.column === 'progress').length,
+                    overdue: overdueTasks.length
+                });
 
                 // Update charts only if containers exist and there are tasks
                 if (tasks.length === 0) {
+                    console.log('No tasks found, showing empty state');
                     // Handle empty state for all charts
                     updateStatusChart([]);
                     updatePriorityChart([]);
@@ -1744,6 +1328,7 @@
                     // Update metrics table with empty data
                     updateMetricsTable([]);
                 } else {
+                    console.log('Updating charts with', tasks.length, 'tasks');
                     // Update charts with actual data
                     updateStatusChart(tasks);
                     updatePriorityChart(tasks);
@@ -1753,15 +1338,39 @@
                     
                     // Show success message for data loaded only if notifications are enabled
                     if (showNotifications) {
-                        showNotification('Success', `Metrics updated successfully with ${tasks.length} tasks`, 'success');
+                        showNotification('Success', `Metrics updated successfully with ${tasks.length} tasks`, 'notification');
                     }
                     
                     // Update metrics table
                     updateMetricsTable(tasks);
                 }
+                
+                console.log('Metrics update completed successfully');
             } catch (error) {
                 console.error('Error updating metrics:', error);
-                showNotification('Error', 'Error updating metrics. Please try again.', 'error');
+                
+                // Set all metrics to 0 on error
+                const totalTasksElement = document.getElementById('total-tasks-metric');
+                const completedTasksElement = document.getElementById('completed-tasks-metric');
+                const progressTasksElement = document.getElementById('progress-tasks-metric');
+                const overdueTasksElement = document.getElementById('overdue-tasks-metric');
+                
+                if (totalTasksElement) totalTasksElement.textContent = '0';
+                if (completedTasksElement) completedTasksElement.textContent = '0';
+                if (progressTasksElement) progressTasksElement.textContent = '0';
+                if (overdueTasksElement) overdueTasksElement.textContent = '0';
+                
+                // Show empty charts
+                updateStatusChart([]);
+                updatePriorityChart([]);
+                updateTagChart([]);
+                updateAssigneeChart([]);
+                updateTimelineChart([]);
+                updateMetricsTable([]);
+                
+                if (showNotifications) {
+                    showNotification('Error', `Error updating metrics: ${error.message}. Please check if data is available.`, 'error');
+                }
             }
         }
 
@@ -3563,221 +3172,13 @@
                 // Show modal
                 lifecycleHistoryModal.classList.remove('hidden');
                 
-                // Hide task menu
-                document.getElementById(`menu-${taskId}`).classList.add('hidden');
+                // Hide task menu if it exists
+                const taskMenu = document.getElementById(`menu-${taskId}`);
+                if (taskMenu) {
+                    taskMenu.classList.add('hidden');
+                }
             } catch (error) {
                 console.error('Error loading lifecycle history:', error);
-                showNotification('Error', 'Error loading lifecycle history', 'error');
-            }
-        }
-
-                 function createTimelineEntry(entry, isLast) {
-             const li = document.createElement('li');
-             li.className = isLast ? 'ms-4' : 'mb-10 ms-4';
-             
-             const updateTypeColors = {
-                 creation: 'bg-blue-500',
-                 progress: 'bg-yellow-500',
-                 blocker: 'bg-red-500',
-                 completion: 'bg-green-500',
-                 review: 'bg-purple-500',
-                 testing: 'bg-indigo-500',
-                 deployment: 'bg-gray-500',
-                 other: 'bg-gray-400'
-             };
-
-             const color = updateTypeColors[entry.updateType] || updateTypeColors.other;
-
-             // Format the action description
-             const actionDescription = entry.fromStatus ? 
-                 `moved task from ${getStatusDisplayName(entry.fromStatus)} to ${getStatusDisplayName(entry.toStatus)}` :
-                 `created the task`;
-
-             li.innerHTML = `
-                 <div class="absolute w-3 h-3 ${color} rounded-full mt-1.5 -start-1.5 border border-white"></div>
-                 <time class="mb-1 !text-md font-normal leading-none text-gray-400">${formatDateTime(entry.timestamp)}</time>
-                 <h3 class="!text-md font-semibold text-gray-900">
-                     ${entry.updatedBy} ${actionDescription}
-                 </h3>
-                 <div class="mb-2">
-                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full !text-md font-medium bg-gray-100 text-gray-800">
-                         ${entry.updateType.charAt(0).toUpperCase() + entry.updateType.slice(1)}
-                     </span>
-                 </div>
-                 <p class="!text-md font-normal text-gray-500">${entry.comments}</p>
-             `;
-
-             return li;
-         }
-
-         function formatDateTime(dateString) {
-             if (!dateString) return 'Unknown';
-             const date = new Date(dateString);
-             return date.toLocaleDateString('en-US', { 
-                 year: 'numeric', 
-                 month: 'short', 
-                 day: 'numeric',
-                 hour: '2-digit',
-                 minute: '2-digit',
-                 hour12: true // Added for AM/PM format
-             });
-         }
-
-         // Make viewLifecycleHistory globally available
-         window.viewLifecycleHistory = viewLifecycleHistory;
-
-        // Metrics Table Population Function
-        function updateMetricsTable(tasks) {
-            try {
-                const tableBody = document.getElementById('metrics-table-body');
-                if (!tableBody) {
-                    console.debug('Metrics table body not found');
-                    return;
-                }
-                
-                // Clear existing rows
-                tableBody.innerHTML = '';
-                
-                if (!tasks || tasks.length === 0) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No tasks available or failed to load.</td>
-                    `;
-                    tableBody.appendChild(row);
-                    return;
-                }
-                
-                // Filter tasks that are pending more than 1 month (30 days) and not completed
-                const today = new Date();
-                const oneMonthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-                
-                const overdueTasks = tasks
-                    .filter(task => {
-                        // Exclude completed tasks
-                        if (task.column === 'done') return false;
-                        
-                        // Calculate task age from created date
-                        const createdDate = new Date(task.createdAt || task.startDate);
-                        return createdDate < oneMonthAgo;
-                    })
-                    .map(task => {
-                        const createdDate = new Date(task.createdAt || task.startDate);
-                        const daysPending = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
-                        
-                        return {
-                            ...task,
-                            daysPending: daysPending
-                        };
-                    })
-                    .sort((a, b) => b.daysPending - a.daysPending) // Sort by most overdue first
-                    .slice(0, 10); // Take top 10
-                
-                if (overdueTasks.length === 0) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td colspan="8" class="px-6 py-4 text-center text-green-600">
-                            🎉 Great! No tasks are pending for more than 1 month
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                    return;
-                }
-                
-                // Populate table with overdue tasks
-                overdueTasks.forEach((task, index) => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50';
-                    
-                    // Get priority color
-                    const getPriorityColor = (priority) => {
-                        switch(priority) {
-                            case 'urgent': return 'bg-red-100 text-red-800';
-                            case 'high': return 'bg-orange-100 text-orange-800';
-                            case 'medium': return 'bg-yellow-100 text-yellow-800';
-                            case 'low': return 'bg-blue-100 text-blue-800';
-                            default: return 'bg-gray-100 text-gray-800';
-                        }
-                    };
-                    
-                    // Get status color
-                    const getStatusColor = (status) => {
-                        switch(status) {
-                            case 'todo': return 'bg-yellow-100 text-yellow-800';
-                            case 'progress': return 'bg-blue-100 text-blue-800';
-                            case 'review': return 'bg-purple-100 text-purple-800';
-                            default: return 'bg-gray-100 text-gray-800';
-                        }
-                    };
-                    
-                    // Get days pending color (more overdue = more red)
-                    const getDaysPendingColor = (days) => {
-                        if (days >= 90) return 'bg-red-100 text-red-800 font-bold'; // 3+ months
-                        if (days >= 60) return 'bg-red-100 text-red-700'; // 2+ months
-                        if (days >= 45) return 'bg-orange-100 text-orange-800'; // 1.5+ months
-                        return 'bg-yellow-100 text-yellow-800'; // 1+ month
-                    };
-                    
-                    // Format dates
-                    const formatDate = (dateString) => {
-                        if (!dateString) return 'Not set';
-                        return new Date(dateString).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric',
-                            year: 'numeric'
-                        });
-                    };
-                    
-                    // Truncate long task names
-                    const truncateTitle = (title) => {
-                        return title.length > 50 ? title.substring(0, 50) + '...' : title;
-                    };
-                    
-                    row.innerHTML = `
-                        <td class="px-6 py-4">
-                            <div class="text-sm font-medium text-gray-900" title="${task.title}">
-                                ${truncateTitle(task.title)}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
-                                    ${(task.assignedUser || 'UN').split(' ').map(n => n.charAt(0)).join('').substring(0, 2)}
-                                </div>
-                                <span class="text-sm text-gray-900">${task.assignedUser || 'Unassigned'}</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(task.priority)}">
-                                ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(task.column)}">
-                                ${getStatusDisplayName(task.column)}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                                ${getTagName(task.tag)}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getDaysPendingColor(task.daysPending)}">
-                                ${task.daysPending} days
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                            ${formatDate(task.createdAt)}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                            ${formatDate(task.dueDate)}
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
-                });
-                
-            } catch (error) {
                 console.error('Error updating metrics table:', error);
                 showNotification('Error', 'Error updating metrics table', 'error');
             }
@@ -4026,15 +3427,31 @@
                 noTasksDiv.className = 'text-center py-12 text-gray-500';
                 noTasksDiv.innerHTML = `
                     <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v14a2 2 0 002 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                     </svg>
-                    <p class="text-lg">No tasks for this day</p>
+                    <p class="text-lg font-medium">No tasks scheduled for this day</p>
+                    <p class="text-sm">Enjoy your free time!</p>
                 `;
                 tasksContainer.appendChild(noTasksDiv);
             } else {
-                // Add all tasks for this day
                 dayTasks.forEach(task => {
-                    const taskElement = createDayTaskElement(task);
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow';
+                    taskElement.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-lg font-medium text-gray-900">${task.title}</h4>
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full ${getPriorityBadgeClass(task.priority)}">
+                                ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 mt-2">${task.description}</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="text-sm text-gray-500">Assigned to: ${task.assignedUser || 'Unassigned'}</span>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(task.column)}">
+                                ${getStatusDisplayName(task.column)}
+                            </span>
+                        </div>
+                    `;
                     tasksContainer.appendChild(taskElement);
                 });
             }
@@ -4043,139 +3460,31 @@
             return dayDiv;
         }
 
-        function createDayTaskElement(task) {
-            const taskDiv = document.createElement('div');
-            taskDiv.className = `p-4 rounded-lg border cursor-pointer hover:shadow-md transition-all ${getTaskEventColor(task.tag)} border-gray-200`;
-            
-            taskDiv.innerHTML = `
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <h4 class="font-medium text-sm mb-2">${task.title}</h4>
-                        <p class="text-xs text-gray-600 mb-2">${task.description || 'No description'}</p>
-                        <div class="flex items-center space-x-4 text-xs text-gray-500">
-                            <span>Priority: ${task.priority || 'None'}</span>
-                            <span>Assigned: ${task.assignedUser || 'Unassigned'}</span>
-                            <span>Type: ${getTagName(task.tag)}</span>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(task.status)}">
-                            ${task.status}
-                        </span>
-                    </div>
-                </div>
-            `;
-            
-            // Add click handler to show task details
-            taskDiv.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showTaskDetails(task.id);
-            });
-
-            return taskDiv;
-        }
-
-        function createCalendarDay(date, currentMonth, tasks, isWeekView = false) {
-            const dayDiv = document.createElement('div');
-            const isCurrentMonth = isWeekView || date.getMonth() === currentMonth;
-            const isToday = date.toDateString() === new Date().toDateString();
-            
-            dayDiv.className = `min-h-[120px] p-2 border-r border-b border-gray-200 bg-white ${
-                isToday ? 'bg-blue-50' : ''
-            } ${!isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''}`;
-
-            // Day number
-            const dayNumber = document.createElement('div');
-            dayNumber.className = `text-sm font-medium mb-2 ${
-                isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
-            } ${isToday ? 'text-blue-600 font-bold' : ''}`;
-            dayNumber.textContent = date.getDate();
-            dayDiv.appendChild(dayNumber);
-
-            // Find tasks for this date
-            const dateString = date.toISOString().split('T')[0];
-            const dayTasks = tasks.filter(task => {
-                return task.dueDate === dateString || task.startDate === dateString;
-            });
-
-            // Add task events
-            dayTasks.slice(0, 3).forEach(task => { // Limit to 3 tasks per day for better display
-                const taskEvent = createCalendarTaskEvent(task);
-                dayDiv.appendChild(taskEvent);
-            });
-
-            // Show "more" indicator if there are more than 3 tasks
-            if (dayTasks.length > 3) {
-                const moreDiv = document.createElement('div');
-                moreDiv.className = 'text-xs text-gray-500 cursor-pointer hover:text-gray-700';
-                moreDiv.textContent = `+${dayTasks.length - 3} more`;
-                dayDiv.appendChild(moreDiv);
+        // Helper functions for calendar
+        function getPriorityBadgeClass(priority) {
+            switch(priority) {
+                case 'urgent': return 'bg-red-100 text-red-800';
+                case 'high': return 'bg-orange-100 text-orange-800';
+                case 'medium': return 'bg-yellow-100 text-yellow-800';
+                case 'low': return 'bg-blue-100 text-blue-800';
+                default: return 'bg-gray-100 text-gray-800';
             }
-
-            return dayDiv;
         }
 
-        function createCalendarTaskEvent(task) {
-            const eventDiv = document.createElement('div');
-            eventDiv.className = `text-xs p-1 mb-1 rounded cursor-pointer truncate ${getTaskEventColor(task.tag)}`;
-            eventDiv.title = `${task.title} - ${task.assignedUser || 'Unassigned'}`;
-            eventDiv.textContent = task.title;
-            
-            // Add click handler to show task details
-            eventDiv.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showTaskDetails(task.id);
-            });
-
-            return eventDiv;
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'todo': return 'bg-yellow-100 text-yellow-800';
+                case 'progress': return 'bg-blue-100 text-blue-800';
+                case 'review': return 'bg-purple-100 text-purple-800';
+                case 'done': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
         }
 
-        function getTaskEventColor(tag) {
-            const tagColors = {
-                blue: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-                red: 'bg-red-100 text-red-800 hover:bg-red-200',
-                purple: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
-                green: 'bg-green-100 text-green-800 hover:bg-green-200',
-                yellow: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-            };
-            return tagColors[tag] || 'bg-gray-100 text-gray-800 hover:bg-gray-200';
-        }
-
-        // Calendar navigation
+        // Initialize calendar when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('calendar-prev-btn').addEventListener('click', function() {
-                switch(currentCalendarView) {
-                    case 'month':
-                        currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-                        break;
-                    case 'week':
-                        currentCalendarDate.setDate(currentCalendarDate.getDate() - 7);
-                        break;
-                    case 'day':
-                        currentCalendarDate.setDate(currentCalendarDate.getDate() - 1);
-                        break;
-                }
-                updateCalendar();
-            });
-
-            document.getElementById('calendar-next-btn').addEventListener('click', function() {
-                switch(currentCalendarView) {
-                    case 'month':
-                        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-                        break;
-                    case 'week':
-                        currentCalendarDate.setDate(currentCalendarDate.getDate() + 7);
-                        break;
-                    case 'day':
-                        currentCalendarDate.setDate(currentCalendarDate.getDate() + 1);
-                        break;
-                }
-                updateCalendar();
-            });
+            updateCalendar();
         });
-
-        // Make updateCalendarView available globally
-        window.updateCalendarView = updateCalendarView;
     </script>
 </body>
 </html>
