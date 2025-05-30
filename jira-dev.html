@@ -355,20 +355,6 @@
                                 
                                 <!-- Metrics Dashboard -->
                                 <div class="space-y-6">
-                                    <!-- Metrics Header with Refresh Button -->
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <h2 class="text-xl font-semibold text-gray-900">📊 Task Metrics Dashboard</h2>
-                                            <p class="text-sm text-gray-500 mt-1">Live data from Confluence tasks.json</p>
-                                        </div>
-                                        <button id="refresh-metrics" class="flex items-center gap-2 rounded-lg bg-blue-500 px-4 py-2 !text-md font-medium text-white hover:bg-blue-600 transition-colors">
-                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                            </svg>
-                                            Refresh Metrics
-                                        </button>
-                                    </div>
-                                    
                                     <!-- Summary Cards -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -880,6 +866,25 @@
     </div>
 
     <script>
+        // View switching function - made globally accessible
+        window.switchView = function(viewName) {
+            console.log('Switching to view:', viewName);
+            
+            // This function is used in onclick handlers and Alpine.js @click events
+            // Alpine.js will handle the actual view switching, this is just for compatibility
+            
+            // Find the Alpine.js container and update its data
+            try {
+                const alpineElement = document.querySelector('[x-data]');
+                if (alpineElement && alpineElement.__x && alpineElement.__x.$data) {
+                    alpineElement.__x.$data.activeView = viewName;
+                    console.log('Alpine.js activeView set to:', viewName);
+                }
+            } catch (error) {
+                console.debug('Alpine.js data update failed:', error);
+            }
+        };
+
         // Function to fetch tasks from Confluence (with fallback to dummy data)
         let hasShownOfflineNotification = false; // Flag to ensure offline notification is shown only once
 
@@ -983,36 +988,32 @@
 
             // Add refresh button functionality
             document.getElementById('refresh-data').addEventListener('click', async function() {
-                loadTasksFromConfluence();
-            });
-
-            // Add refresh metrics button functionality
-            document.getElementById('refresh-metrics').addEventListener('click', async function() {
-                console.log('Manual metrics refresh triggered');
+                console.log('Refresh button clicked');
                 try {
+                    // Disable button and show loading state
                     this.disabled = true;
+                    const originalHTML = this.innerHTML;
                     this.innerHTML = `
                         <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         Refreshing...
                     `;
                     
-                    await updateMetrics(true);
+                    // Call loadTasksFromConfluence with notifications enabled
+                    await loadTasksFromConfluence(true);
                     
-                    showNotification('Success', 'Metrics refreshed successfully', 'notification');
-                } catch (error) {
-                    console.error('Manual metrics refresh failed:', error);
-                    showNotification('Error', 'Failed to refresh metrics data', 'error');
-                } finally {
+                    // Restore button
+                    this.innerHTML = originalHTML;
                     this.disabled = false;
-                    this.innerHTML = `
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refresh Metrics
-                    `;
+                } catch (error) {
+                    console.error('Error during manual refresh:', error);
+                    // Restore button even on error
+                    this.innerHTML = originalHTML;
+                    this.disabled = false;
+                    // The error notification will be handled by loadTasksFromConfluence
+                    // showNotification('Error', 'Failed to refresh data. Please try again.', 'error'); 
                 }
             });
 
