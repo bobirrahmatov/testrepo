@@ -182,13 +182,24 @@
                         console.log('View changed to:', value); 
                         if (value === 'metrics') { 
                             console.log('Switching to metrics view, updating charts...');
+                            // Add longer delay and ensure DOM is ready for chart rendering
                             setTimeout(async () => {
                                 try {
-                                    await updateMetrics(true);
+                                    // Ensure chart containers are visible before rendering
+                                    const statusChart = document.getElementById('statusChart');
+                                    const priorityChart = document.getElementById('priorityChart');
+                                    
+                                    if (statusChart && priorityChart) {
+                                        console.log('Chart containers found, proceeding with metrics update');
+                                    await updateMetrics(false); // Pass false to prevent double notifications
+                                    } else {
+                                        console.warn('Chart containers not found, retrying...');
+                                        setTimeout(() => updateMetrics(false), 500);
+                                    }
                                 } catch (error) {
                                     console.error('Error updating metrics:', error);
                                 }
-                            }, 300); 
+                            }, 500); // Increased delay to ensure DOM transition is complete
                         } else if (value === 'calendar') { 
                             setTimeout(() => updateCalendar(), 200); 
                         }
@@ -446,13 +457,7 @@
                                     </div>
 
                                     <!-- Removed Charts Row 2 (Task Type Distribution, Assignee Workload) and Row 3 (Timeline) - replaced with table below -->
-                                    <div class="grid grid-cols-1 gap-6">
-                                        <!-- Task Timeline -->
-                                        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm" style="display: none;">
-                                            <h3 class="!text-md font-medium text-gray-900 mb-4">Tasks by Due Date Timeline</h3>
-                                            <div id="timelineChart"><!-- Chart removed --></div>
-                                        </div>
-                                    </div>
+                                    <!-- Timeline chart section removed to simplify metrics view -->
 
                                     <!-- Task Details Table -->
                                     <div class="grid grid-cols-1 gap-6">
@@ -682,7 +687,7 @@
                             
                             <div class="w-full px-2.5 flex justify-end space-x-2">
                                 <button type="button" id="cancel-task" class="px-4 py-2 !text-md font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200">Cancel</button>
-                                <button type="submit" class="px-4 py-2 !text-md font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">Add Task</button>
+                                <button type="submit" class="px-4 py-2 !text-md font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">Save</button>
                             </div>
                         </div>
                     </form>
@@ -866,6 +871,152 @@
     </div>
 
     <script>
+        // Update notification function to handle error type - moved to top for availability
+        function showNotification(title, message, type = 'notification') {
+            const container = document.getElementById('notificationsContainer');
+            const notification = document.createElement('div');
+            
+            const bgColor = type === 'error' 
+                ? 'bg-red-100' 
+                : type === 'message' 
+                    ? 'bg-blue-100' 
+                    : type === 'success'
+                        ? 'bg-green-100'
+                        : 'bg-green-100';
+            
+            const iconColor = type === 'error'
+                ? 'text-red-600'
+                : type === 'message'
+                    ? 'text-blue-600'
+                    : type === 'success'
+                        ? 'text-green-600'
+                        : 'text-green-600';
+
+            const icon = type === 'error'
+                ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>`
+                : type === 'message'
+                    ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                    </svg>`
+                    : type === 'success'
+                        ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>`
+                        : `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>`;
+
+            notification.className = `flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg notification-item`;
+            
+            notification.innerHTML = `
+                <div class="flex h-10 w-10 items-center justify-center rounded-full ${bgColor}">
+                    ${icon}
+                </div>
+                <div class="flex-1">
+                    <h4 class="!text-md font-medium text-gray-900">${title}</h4>
+                    <p class="!text-md text-gray-500">${message}</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-500 close-notification">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+
+            container.appendChild(notification);
+
+            // Add close button functionality
+            const closeButton = notification.querySelector('.close-notification');
+            closeButton.addEventListener('click', () => {
+                notification.remove();
+            });
+
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Temporary updateMetrics stub to prevent Alpine.js watcher errors
+        // This will be replaced by the real function later in the script
+        let pendingMetricsUpdates = [];
+        let realUpdateMetrics = null;
+        
+        async function updateMetrics(showNotifications = true) {
+            console.log('updateMetrics stub called, showNotifications:', showNotifications);
+            if (realUpdateMetrics && typeof realUpdateMetrics === 'function') {
+                console.log('Real updateMetrics function is available, calling it');
+                return await realUpdateMetrics(showNotifications);
+            } else {
+                console.log('Real updateMetrics function not yet available, queuing call');
+                pendingMetricsUpdates.push(showNotifications);
+                // Try again in a short while
+                setTimeout(() => {
+                    if (realUpdateMetrics && typeof realUpdateMetrics === 'function') {
+                        console.log('Executing queued updateMetrics call');
+                        realUpdateMetrics(showNotifications);
+                        pendingMetricsUpdates = []; // Clear pending calls
+                    }
+                }, 1000);
+            }
+        }
+
+        // Helper function to register the real updateMetrics function
+        function registerRealUpdateMetrics(fn) {
+            console.log('Registering real updateMetrics function');
+            realUpdateMetrics = fn;
+            // Execute any pending calls
+            if (pendingMetricsUpdates.length > 0) {
+                console.log('Executing', pendingMetricsUpdates.length, 'pending updateMetrics calls');
+                pendingMetricsUpdates.forEach(showNotifications => {
+                    realUpdateMetrics(showNotifications);
+                });
+                pendingMetricsUpdates = [];
+            }
+        }
+
+        // Temporary updateCalendar stub to prevent Alpine.js watcher errors
+        // This will be replaced by the real function later in the script
+        let pendingCalendarUpdates = [];
+        let realUpdateCalendar = null;
+        
+        function updateCalendar() {
+            console.log('updateCalendar stub called');
+            if (realUpdateCalendar && typeof realUpdateCalendar === 'function') {
+                console.log('Real updateCalendar function is available, calling it');
+                return realUpdateCalendar();
+            } else {
+                console.log('Real updateCalendar function not yet available, queuing call');
+                pendingCalendarUpdates.push(true);
+                // Try again in a short while
+                setTimeout(() => {
+                    if (realUpdateCalendar && typeof realUpdateCalendar === 'function') {
+                        console.log('Executing queued updateCalendar call');
+                        realUpdateCalendar();
+                        pendingCalendarUpdates = []; // Clear pending calls
+                    }
+                }, 1000);
+            }
+        }
+
+        // Helper function to register the real updateCalendar function
+        function registerRealUpdateCalendar(fn) {
+            console.log('Registering real updateCalendar function');
+            realUpdateCalendar = fn;
+            // Execute any pending calls
+            if (pendingCalendarUpdates.length > 0) {
+                console.log('Executing', pendingCalendarUpdates.length, 'pending updateCalendar calls');
+                pendingCalendarUpdates.forEach(() => {
+                    realUpdateCalendar();
+                });
+                pendingCalendarUpdates = [];
+            }
+        }
+
         // View switching function - made globally accessible
         window.switchView = function(viewName) {
             console.log('Switching to view:', viewName);
@@ -883,10 +1034,36 @@
             } catch (error) {
                 console.debug('Alpine.js data update failed:', error);
             }
+            
+            // Handle view-specific updates
+            if (viewName === 'table') {
+                // When switching to table view, populate it with existing data
+                console.log('Switching to table view, updating table...');
+                if (typeof updateTableView === 'function') {
+                    updateTableView().catch(error => {
+                        console.error('Error updating table view:', error);
+                    });
+                }
+            } else if (viewName === 'calendar') {
+                // When switching to calendar view, update it
+                console.log('Switching to calendar view, updating calendar...');
+                if (typeof updateCalendar === 'function') {
+                    updateCalendar();
+                }
+            } else if (viewName === 'metrics') {
+                // When switching to metrics view, update it
+                console.log('Switching to metrics view, updating metrics...');
+                if (typeof updateMetrics === 'function') {
+                    updateMetrics(false).catch(error => {
+                        console.error('Error updating metrics view:', error);
+                    });
+                }
+            }
         };
 
         // Function to fetch tasks from Confluence (with fallback to dummy data)
         let hasShownOfflineNotification = false; // Flag to ensure offline notification is shown only once
+        let usingFallbackData = false; // Flag to indicate if fallback data is being used
 
         async function fetchTasks() {
             try {
@@ -914,31 +1091,57 @@
                 
                 if (tasks.length > 0) {
                     console.log('Sample task:', tasks[0]);
+                    usingFallbackData = false; // Successfully fetched real data
+                    return tasks;
                 } else {
-                    console.log('No tasks found in response');
+                    console.log('No tasks found in response, will use fallback data.');
+                    // If no tasks are returned, treat it as a case for fallback data
+                    throw new Error('No tasks found in Confluence response.');
                 }
                 
-                return tasks;
             } catch (error) {
                 // Log the error and re-throw it to be caught by the caller
-                console.error('Error fetching tasks from Confluence:', error);
-                console.error('Error details:', {
+                console.warn('Error fetching tasks from Confluence, attempting to use fallback data:', error);
+                console.warn('Error details:', {
                     message: error.message,
                     name: error.name,
-                    stack: error.stack
+                    // stack: error.stack // Stack can be very long, omitting for brevity
                 });
-                
-                // Show more specific error information
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    throw new Error('Unable to connect to Confluence. Please check your internet connection and ensure the Confluence server is accessible.');
-                } else if (error.message.includes('404')) {
-                    throw new Error('Tasks data file not found on Confluence. Please ensure tasks.json exists.');
-                } else if (error.message.includes('403') || error.message.includes('401')) {
-                    throw new Error('Access denied. Please check your permissions to access the Confluence page.');
-                } else {
-                    throw error; // Re-throw the original error if it's not a common network issue
+
+                // Use fallback data
+                usingFallbackData = true;
+                console.log("Using fallback data due to error or no tasks from Confluence.");
+                if (!hasShownOfflineNotification) {
+                    showNotification('Info', 'Failed to load live data. Using sample fallback data.', 'message');
+                    hasShownOfflineNotification = true;
                 }
+                return getFallbackTasks();
             }
+        }
+
+        function getFallbackTasks() {
+            console.log("Providing fallback tasks.");
+            const today = new Date();
+            const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+            const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+            const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7);
+            const lastWeek = new Date(today); lastWeek.setDate(today.getDate() - 7);
+
+            // Helper function to format date locally
+            function formatDate(date) {
+                return date.getFullYear() + '-' + 
+                       String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(date.getDate()).padStart(2, '0');
+            }
+
+            return [
+                { id: 'task1', title: 'Fallback Task 1: Design Homepage', description: 'Create mockups for the new homepage design.', tag: 'purple', priority: 'high', assignedUser: 'User 1', submittedBy: 'User 3', startDate: formatDate(yesterday), dueDate: formatDate(tomorrow), column: 'todo', createdAt: yesterday.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb1_1', timestamp: yesterday.toISOString(), fromStatus: null, toStatus: 'todo', updateType: 'creation', comments: 'Task created (fallback)', updatedBy: 'User 3'}] },
+                { id: 'task2', title: 'Fallback Task 2: Develop API Endpoint', description: 'Implement the user authentication API endpoint.', tag: 'blue', priority: 'urgent', assignedUser: 'User 2', submittedBy: 'User 1', startDate: formatDate(today), dueDate: formatDate(nextWeek), column: 'progress', createdAt: today.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb2_1', timestamp: today.toISOString(), fromStatus: null, toStatus: 'progress', updateType: 'creation', comments: 'Task created and started (fallback)', updatedBy: 'User 1'}] },
+                { id: 'task3', title: 'Fallback Task 3: Write Blog Post', description: 'Draft a blog post about Q2 updates.', tag: 'green', priority: 'medium', assignedUser: 'User 3', submittedBy: 'User 2', startDate: formatDate(lastWeek), dueDate: formatDate(today), column: 'review', createdAt: lastWeek.toISOString(), updatedAt: yesterday.toISOString(), lifecycle: [{id: 'lc_fb3_1', timestamp: lastWeek.toISOString(), fromStatus: null, toStatus: 'todo', updateType: 'creation', comments: 'Task created (fallback)', updatedBy: 'User 2'}, {id: 'lc_fb3_2', timestamp: yesterday.toISOString(), fromStatus: 'todo', toStatus: 'review', updateType: 'progress', comments: 'Moved to review (fallback)', updatedBy: 'User 3'}] },
+                { id: 'task4', title: 'Fallback Task 4: Fix Login Bug', description: 'Resolve the critical login bug reported yesterday.', tag: 'red', priority: 'urgent', assignedUser: 'User 1', submittedBy: 'User 4', startDate: formatDate(yesterday), dueDate: formatDate(today), column: 'todo', createdAt: yesterday.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb4_1', timestamp: yesterday.toISOString(), fromStatus: null, toStatus: 'todo', updateType: 'creation', comments: 'Urgent bug reported (fallback)', updatedBy: 'User 4'}] },
+                { id: 'task5', title: 'Fallback Task 5: User Testing', description: 'Conduct user testing for the new feature.', tag: 'yellow', priority: 'high', assignedUser: 'User 4', submittedBy: 'User 1', startDate: formatDate(today), dueDate: formatDate(nextWeek), column: 'progress', createdAt: today.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb5_1', timestamp: today.toISOString(), fromStatus: null, toStatus: 'progress', updateType: 'creation', comments: 'User testing initiated (fallback)', updatedBy: 'User 1'}] },
+                { id: 'task6', title: 'Fallback Task 6: Deploy to Staging', description: 'Deploy the latest build to the staging environment.', tag: 'blue', priority: 'medium', assignedUser: 'User 2', submittedBy: 'User 5', startDate: formatDate(tomorrow), dueDate: formatDate(nextWeek), column: 'done', createdAt: lastWeek.toISOString(), updatedAt: yesterday.toISOString(), lifecycle: [{id: 'lc_fb6_1', timestamp: lastWeek.toISOString(), fromStatus: null, toStatus: 'progress', updateType: 'creation', comments: 'Task created (fallback)', updatedBy: 'User 5'}, {id: 'lc_fb6_2', timestamp: yesterday.toISOString(), fromStatus: 'progress', toStatus: 'done', updateType: 'completion', comments: 'Deployed to staging (fallback)', updatedBy: 'User 2'}]}
+            ];
         }
 
         // Function to save tasks to Confluence (always use tasks.json)
@@ -980,11 +1183,52 @@
 
         // Initialize view switching
         document.addEventListener('DOMContentLoaded', async function () {
+            // Declare flags and observers early to avoid temporal dead zone issues
+            let isRefreshing = false; // Flag to prevent concurrent updates during refresh
+            let isUpdatingTable = false; // Flag to prevent concurrent table updates
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList' && !isRefreshing) { // Only react if not refreshing
+                        console.log('MutationObserver detected change, updating table view');
+                        updateTableView().catch(console.error);
+                    }
+                });
+            });
+            
             // Initialize with kanban view
             window.switchView('kanban');
             
             // Load initial tasks
             await loadTasksFromConfluence(false); // Pass false to prevent initial notifications
+
+            // Add calendar navigation event listeners
+            document.getElementById('calendar-prev-btn').addEventListener('click', function() {
+                navigateCalendar(-1);
+            });
+            
+            document.getElementById('calendar-next-btn').addEventListener('click', function() {
+                navigateCalendar(1);
+            });
+
+            // Function to navigate calendar
+            function navigateCalendar(direction) {
+                switch(currentCalendarView) {
+                    case 'month':
+                        // Handle month navigation properly to avoid date overflow
+                        const currentMonth = currentCalendarDate.getMonth();
+                        const currentYear = currentCalendarDate.getFullYear();
+                        // Set to first day of month to avoid overflow issues
+                        currentCalendarDate = new Date(currentYear, currentMonth + direction, 1);
+                        break;
+                    case 'week':
+                        currentCalendarDate.setDate(currentCalendarDate.getDate() + (direction * 7));
+                        break;
+                    case 'day':
+                        currentCalendarDate.setDate(currentCalendarDate.getDate() + direction);
+                        break;
+                }
+                updateCalendarReal();
+            }
 
             // Add refresh button functionality
             document.getElementById('refresh-data').addEventListener('click', async function() {
@@ -1012,14 +1256,21 @@
                     // Restore button even on error
                     this.innerHTML = originalHTML;
                     this.disabled = false;
-                    // The error notification will be handled by loadTasksFromConfluence
-                    // showNotification('Error', 'Failed to refresh data. Please try again.', 'error'); 
+                    // Show error notification if not already shown by loadTasksFromConfluence
+                    showNotification('Error', 'Failed to refresh data. Please try again.', 'error');
                 }
             });
 
             // Function to load tasks from Confluence
             async function loadTasksFromConfluence(showNotifications = true) {
                 try {
+                    // Set refreshing flag to prevent MutationObserver from triggering extra updates
+                    isRefreshing = true;
+                    console.log('loadTasksFromConfluence: Starting refresh, isRefreshing =', isRefreshing);
+                    
+                    // Temporarily disconnect the observer to prevent interference
+                    observer.disconnect();
+                    
                     // Reset all counters to 0 first
                     document.querySelectorAll('.task-counter').forEach(counter => {
                         counter.textContent = '0';
@@ -1029,9 +1280,10 @@
                     document.querySelectorAll('.task-list').forEach(list => list.innerHTML = '');
 
                     const tasks = await fetchTasks();
+                    console.log('fetchTasks returned:', tasks.length, 'tasks');
                     
                     if (tasks.length > 0) {
-                        // Add tasks to their respective columns
+                        // Saves to their respective columns
                         tasks.forEach(task => {
                             const column = document.getElementById(`${task.column}-column`);
                             if (column) {
@@ -1048,8 +1300,11 @@
                             }
                         });
                         
-                        // Update counters and table view only after all tasks are added
+                        // Update counters
                         updateTaskCounters();
+                        console.log('Tasks loaded into kanban, updating table view...');
+                        
+                        // Update table view only once, after all tasks are loaded
                         await updateTableView();
                         
                         // Reapply search filter if one is active
@@ -1058,11 +1313,29 @@
                         }
                         
                         if (showNotifications === true) {
-                            showNotification('Success', 'Tasks loaded successfully', 'notification');
+                            showNotification('Success', `${tasks.length} tasks loaded successfully`, 'notification');
                         }
                     } else if (showNotifications) {
                         showNotification('Info', 'No tasks found or unable to load tasks from the server.', 'message');
                     }
+
+                    // After tasks are loaded, check current view and update if necessary
+                    try {
+                        const alpineElement = document.querySelector('[x-data]');
+                        if (alpineElement && alpineElement.__x && alpineElement.__x.$data) {
+                            const currentView = alpineElement.__x.$data.activeView;
+                            if (currentView === 'metrics') {
+                                console.log('loadTasksFromConfluence: Active view is metrics, updating metrics.');
+                                await updateMetrics(false); // false to avoid double notification
+                            } else if (currentView === 'calendar') {
+                                console.log('loadTasksFromConfluence: Active view is calendar, updating calendar.');
+                                updateCalendar();
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('Could not check active view to refresh metrics/calendar after task load:', error);
+                    }
+
                 } catch (error) {
                     console.error('Error loading tasks:', error);
                     if (showNotifications) {
@@ -1071,6 +1344,17 @@
                     // Reset counters to 0 on error
                     document.querySelectorAll('.task-counter').forEach(counter => {
                         counter.textContent = '0';
+                    });
+                } finally {
+                    // Always reset the refreshing flag and reconnect observer
+                    isRefreshing = false;
+                    console.log('loadTasksFromConfluence: Finished refresh, isRefreshing =', isRefreshing);
+                    
+                    // Reconnect the observer
+                    document.querySelectorAll('.task-list').forEach(list => {
+                        observer.observe(list, {
+                            childList: true
+                        });
                     });
                 }
             }
@@ -1114,20 +1398,12 @@
             }
 
             // Add MutationObserver to update table view when tasks are modified
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                        updateTableView().catch(console.error);
-                    }
-                });
-            });
-
             // Observe task lists for changes
             document.querySelectorAll('.task-list').forEach(list => {
                 observer.observe(list, {
-                    childList: true,
-                    attributes: true,
-                    subtree: true
+                    childList: true, // Only observe direct children additions/removals
+                    // attributes: true, // Removed
+                    // subtree: true // Removed
                 });
             });
 
@@ -1154,7 +1430,7 @@
                 });
             });
 
-            // Add Task Modal Functionality
+            // Save Modal Functionality
             const taskModal = document.getElementById('task-modal');
             const taskForm = document.getElementById('task-form');
             const closeModal = document.getElementById('close-modal');
@@ -1174,7 +1450,7 @@
                     taskForm.reset();
             }
 
-            // Add event listeners for Add Task buttons
+            // Add event listeners for Save buttons
             document.getElementById('add-todo').addEventListener('click', () => showTaskModal('todo'));
             document.getElementById('add-progress').addEventListener('click', () => showTaskModal('progress'));
             document.getElementById('add-review').addEventListener('click', () => showTaskModal('review'));
@@ -1272,13 +1548,27 @@
         // Metrics and Charts functionality
         let charts = {};
 
-        // Function to update metrics
-        async function updateMetrics(showNotifications = true) {
+        // Real function to update metrics (will be registered with the stub system)
+        async function updateMetricsReal(showNotifications = true) {
             try {
                 console.log('Starting metrics update...');
+                
+                // Check if ApexCharts is loaded
+                if (typeof ApexCharts === 'undefined') {
+                    console.error('ApexCharts library not loaded');
+                    alert('ApexCharts library not loaded!');
+                    throw new Error('ApexCharts library not available');
+                }
+                console.log('ApexCharts library is available');
+                
                 const tasks = await fetchTasks();
                 console.log('Fetched tasks for metrics:', tasks);
                 console.log('Number of tasks loaded:', tasks.length);
+                
+                // Debug: Show a visible indication that metrics update was called
+                if (showNotifications) {
+                    console.log(`Metrics update called with ${tasks.length} tasks. ApexCharts available: ${typeof ApexCharts !== 'undefined'}`);
+                }
                 
                 if (!tasks) {
                     console.error('Tasks is null or undefined');
@@ -1314,12 +1604,9 @@
                 // Update charts only if containers exist and there are tasks
                 if (tasks.length === 0) {
                     console.log('No tasks found, showing empty state');
-                    // Handle empty state for all charts
+                    // Handle empty state for available charts only
                     updateStatusChart([]);
                     updatePriorityChart([]);
-                    updateTagChart([]);
-                    updateAssigneeChart([]);
-                    updateTimelineChart([]);
                     
                     // Show message for no data only if notifications are enabled
                     if (showNotifications) {
@@ -1330,12 +1617,9 @@
                     updateMetricsTable([]);
                 } else {
                     console.log('Updating charts with', tasks.length, 'tasks');
-                    // Update charts with actual data
+                    // Update charts with actual data (only existing charts)
                     updateStatusChart(tasks);
                     updatePriorityChart(tasks);
-                    updateTagChart(tasks);
-                    updateAssigneeChart(tasks);
-                    updateTimelineChart(tasks);
                     
                     // Show success message for data loaded only if notifications are enabled
                     if (showNotifications) {
@@ -1361,12 +1645,9 @@
                 if (progressTasksElement) progressTasksElement.textContent = '0';
                 if (overdueTasksElement) overdueTasksElement.textContent = '0';
                 
-                // Show empty charts
+                // Show empty charts (only existing charts)
                 updateStatusChart([]);
                 updatePriorityChart([]);
-                updateTagChart([]);
-                updateAssigneeChart([]);
-                updateTimelineChart([]);
                 updateMetricsTable([]);
                 
                 if (showNotifications) {
@@ -1375,10 +1656,16 @@
             }
         }
 
+        // Register the real updateMetrics function with the stub system
+        registerRealUpdateMetrics(updateMetricsReal);
+
         // Status Distribution Chart
         function updateStatusChart(tasks) {
             try {
+                console.log('updateStatusChart called with tasks:', tasks ? tasks.length : 'null');
                 const chartElement = document.getElementById('statusChart');
+                console.log('statusChart element found:', !!chartElement);
+                
                 if (!chartElement) {
                     console.debug('Status chart element not found');
                     return;
@@ -1386,9 +1673,11 @@
                 
                 if (window.statusChart && typeof window.statusChart.destroy === 'function') {
                     window.statusChart.destroy();
+                    console.log('Previous statusChart destroyed');
                 }
 
                 if (!tasks || tasks.length === 0) {
+                    console.log('Creating empty status chart');
                     const options = {
                         series: [1],
                         chart: {
@@ -1406,6 +1695,7 @@
                     };
                     window.statusChart = new ApexCharts(chartElement, options);
                     window.statusChart.render();
+                    console.log('Empty status chart rendered');
                     return;
                 }
 
@@ -1421,6 +1711,8 @@
                         statusCounts[task.column]++;
                     }
                 });
+                
+                console.log('Status counts calculated:', statusCounts);
 
                 const options = {
                     series: [statusCounts.todo, statusCounts.progress, statusCounts.review, statusCounts.done],
@@ -1497,6 +1789,7 @@
 
                 window.statusChart = new ApexCharts(chartElement, options);
                 window.statusChart.render();
+                console.log('Status chart with data rendered successfully');
             } catch (error) {
                 console.error('Error updating status chart:', error);
                 showNotification('Error', 'Error updating status chart', 'error');
@@ -1506,7 +1799,10 @@
         // Priority Distribution Chart
         function updatePriorityChart(tasks) {
             try {
+                console.log('updatePriorityChart called with tasks:', tasks ? tasks.length : 'null');
                 const chartElement = document.getElementById('priorityChart');
+                console.log('priorityChart element found:', !!chartElement);
+                
                 if (!chartElement) {
                     console.debug('Priority chart element not found');
                     return;
@@ -1514,6 +1810,7 @@
                 
                 if (window.priorityChart && typeof window.priorityChart.destroy === 'function') {
                     window.priorityChart.destroy();
+                    console.log('Previous priorityChart destroyed');
                 }
 
                 if (!tasks || tasks.length === 0) {
@@ -1719,496 +2016,13 @@
         }
 
         // Tag Distribution Chart
-        function updateTagChart(tasks) {
-            try {
-                const chartElement = document.getElementById('tagChart');
-                if (!chartElement) {
-                    console.debug('Tag chart element not found');
-                    return;
-                }
-                
-                if (window.tagChart && typeof window.tagChart.destroy === 'function') {
-                    window.tagChart.destroy();
-                }
-
-                if (!tasks || tasks.length === 0) {
-                    const options = {
-                        series: [1],
-                        chart: {
-                            type: 'pie',
-                            height: 300
-                        },
-                        labels: ['No Data'],
-                        colors: ['#e0e0e0'],
-                        legend: {
-                            show: false
-                        },
-                        tooltip: {
-                            enabled: false
-                        }
-                    };
-                    window.tagChart = new ApexCharts(chartElement, options);
-                    window.tagChart.render();
-                    return;
-                }
-
-                const tagCounts = {};
-                const tagNames = {
-                    'blue': 'New Development',
-                    'red': 'Bug',
-                    'purple': 'Design',
-                    'green': 'Enhancement',
-                    'yellow': 'Ad Hoc'
-                };
-                
-                tasks.forEach(task => {
-                    if (task.tag) {
-                        const tagName = tagNames[task.tag] || task.tag;
-                        tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
-                    }
-                });
-
-                const labels = Object.keys(tagCounts);
-                const data = Object.values(tagCounts);
-                const colors = ['#465FFF', '#8B92FF', '#A3AFFF', '#C4CBFF', '#E1E5FF'];
-
-                const options = {
-                    series: data,
-                    chart: {
-                        type: 'pie',
-                        height: 300,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: {
-                            show: false
-                        }
-                    },
-                    labels: labels,
-                    colors: colors,
-                    legend: {
-                        position: 'right',
-                        fontFamily: 'Outfit, sans-serif',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        labels: {
-                            colors: ['#374151']
-                        }
-                    },
-                    plotOptions: {
-                        pie: {
-                            expandOnClick: false,
-                            donut: {
-                                labels: {
-                                    show: false
-                                }
-                            }
-                        }
-                    },
-                    dataLabels: {
-                        enabled: true,
-                        style: {
-                            fontFamily: 'Outfit, sans-serif',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            colors: ['#fff']
-                        },
-                        dropShadow: {
-                            enabled: false
-                        }
-                    },
-                    tooltip: {
-                        style: {
-                            fontFamily: 'Outfit, sans-serif'
-                        }
-                    }
-                };
-
-                window.tagChart = new ApexCharts(chartElement, options);
-                window.tagChart.render();
-            } catch (error) {
-                console.error('Error updating tag chart:', error);
-                showNotification('Error', 'Error updating tag chart', 'error');
-            }
-        }
+        // function updateTagChart(tasks) - REMOVED: Chart not used in current metrics view
 
         // Assignee Workload Chart
-        function updateAssigneeChart(tasks) {
-            try {
-                const chartElement = document.getElementById('assigneeChart');
-                if (!chartElement) {
-                    console.debug('Assignee chart element not found');
-                    return;
-                }
-                
-                if (window.assigneeChart && typeof window.assigneeChart.destroy === 'function') {
-                    window.assigneeChart.destroy();
-                }
-
-                if (!tasks || tasks.length === 0) {
-                    const options = {
-                        series: [{
-                            data: [0]
-                        }],
-                        chart: {
-                            type: 'bar',
-                            height: 300
-                        },
-                        xaxis: {
-                            categories: ['No Data']
-                        },
-                        colors: ['#e0e0e0'],
-                        legend: {
-                            show: false
-                        },
-                        tooltip: {
-                            enabled: false
-                        }
-                    };
-                    window.assigneeChart = new ApexCharts(chartElement, options);
-                    window.assigneeChart.render();
-                    return;
-                }
-
-                const assigneeCounts = {};
-                tasks.forEach(task => {
-                    if (task.assignedUser) {
-                        assigneeCounts[task.assignedUser] = (assigneeCounts[task.assignedUser] || 0) + 1;
-                    }
-                });
-
-                const labels = Object.keys(assigneeCounts);
-                const data = Object.values(assigneeCounts);
-                const colors = ['#465FFF', '#8B92FF', '#A3AFFF', '#C4CBFF', '#E1E5FF'];
-
-                const options = {
-                    series: [{
-                        name: 'Tasks Assigned',
-                        data: data
-                    }],
-                    chart: {
-                        type: 'bar',
-                        height: 300,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: {
-                            show: false
-                        }
-                    },
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 8,
-                            columnWidth: '60%',
-                            distributed: true
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    xaxis: {
-                        categories: labels,
-                        labels: {
-                            style: {
-                                fontFamily: 'Outfit, sans-serif',
-                                fontSize: '12px',
-                                fontWeight: 400,
-                                colors: ['#373d3f']
-                            }
-                        },
-                        axisBorder: {
-                            show: false
-                        },
-                        axisTicks: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            style: {
-                                fontFamily: 'Outfit, sans-serif',
-                                fontSize: '11px',
-                                fontWeight: 400,
-                                colors: ['#373d3f']
-                            }
-                        }
-                    },
-                    colors: colors,
-                    fill: {
-                        type: 'gradient',
-                        gradient: {
-                            shade: 'light',
-                            type: 'vertical',
-                            shadeIntensity: 0.25,
-                            gradientToColors: ['#A3AFFF', '#C4CBFF', '#E1E5FF', '#F0F2FF', '#F8F9FF'],
-                            inverseColors: true,
-                            opacityFrom: 1,
-                            opacityTo: 0.85,
-                            stops: [0, 100]
-                        }
-                    },
-                    grid: {
-                        borderColor: '#e0e0e0',
-                        strokeDashArray: 0,
-                        xaxis: {
-                            lines: {
-                                show: false
-                            }
-                        },
-                        yaxis: {
-                            lines: {
-                                show: true
-                            }
-                        }
-                    },
-                    tooltip: {
-                        style: {
-                            fontFamily: 'Outfit, sans-serif'
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                };
-
-                window.assigneeChart = new ApexCharts(chartElement, options);
-                window.assigneeChart.render();
-            } catch (error) {
-                console.error('Error updating assignee chart:', error);
-                showNotification('Error', 'Error updating assignee chart', 'error');
-            }
-        }
+        // function updateAssigneeChart(tasks) - REMOVED: Chart not used in current metrics view
 
         // Timeline Chart
-        function updateTimelineChart(tasks) {
-            try {
-                const chartElement = document.getElementById('timelineChart');
-                if (!chartElement) {
-                    console.debug('Timeline chart element not found');
-                    return;
-                }
-                
-                if (window.timelineChart && typeof window.timelineChart.destroy === 'function') {
-                    window.timelineChart.destroy();
-                }
-
-                if (!tasks || tasks.length === 0) {
-                    const options = {
-                        series: [{
-                            data: [0]
-                        }],
-                        chart: {
-                            type: 'line',
-                            height: 300,
-                            fontFamily: 'Outfit, sans-serif',
-                            toolbar: {
-                                show: false
-                            },
-                            zoom: {
-                                enabled: false
-                            }
-                        },
-                        dataLabels: {
-                            enabled: false
-                        },
-                        stroke: {
-                            width: 3,
-                            curve: 'smooth'
-                        },
-                        markers: {
-                            size: 6,
-                            colors: ['#465FFF'],
-                            strokeColors: '#fff',
-                            strokeWidth: 2,
-                            hover: {
-                                size: 8
-                            }
-                        },
-                        xaxis: {
-                            categories: ['No Data'],
-                            labels: {
-                                style: {
-                                    fontFamily: 'Outfit, sans-serif',
-                                    fontSize: '12px',
-                                    fontWeight: 400,
-                                    colors: ['#373d3f']
-                                }
-                            },
-                            axisBorder: {
-                                show: false
-                            },
-                            axisTicks: {
-                                show: false
-                            }
-                        },
-                        yaxis: {
-                            labels: {
-                                style: {
-                                    fontFamily: 'Outfit, sans-serif',
-                                    fontSize: '11px',
-                                    fontWeight: 400,
-                                    colors: ['#373d3f']
-                                }
-                            }
-                        },
-                        colors: ['#465FFF'],
-                        fill: {
-                            type: 'gradient',
-                            gradient: {
-                                shade: 'light',
-                                type: 'vertical',
-                                shadeIntensity: 0.4,
-                                gradientToColors: ['#A3AFFF'],
-                                inverseColors: false,
-                                opacityFrom: 0.5,
-                                opacityTo: 0.1,
-                                stops: [0, 100]
-                            }
-                        },
-                        grid: {
-                            borderColor: '#e0e0e0',
-                            strokeDashArray: 0,
-                            xaxis: {
-                                lines: {
-                                    show: false
-                                }
-                            },
-                            yaxis: {
-                                lines: {
-                                    show: true
-                                }
-                            }
-                        },
-                        tooltip: {
-                            style: {
-                                fontFamily: 'Outfit, sans-serif'
-                            },
-                            x: {
-                                format: 'MMM dd'
-                            }
-                        },
-                        legend: {
-                            show: false
-                        }
-                    };
-                    window.timelineChart = new ApexCharts(chartElement, options);
-                    window.timelineChart.render();
-                    return;
-                }
-
-                const last7Days = Array.from({length: 7}, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
-                    return date.toISOString().split('T')[0];
-                }).reverse();
-
-                const taskCounts = last7Days.map(date => 
-                    tasks.filter(task => task.dueDate === date).length
-                );
-
-                const options = {
-                    series: [{
-                        name: 'Tasks Due',
-                        data: taskCounts
-                    }],
-                    chart: {
-                        type: 'line',
-                        height: 300,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: {
-                            show: false
-                        },
-                        zoom: {
-                            enabled: false
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        width: 3,
-                        curve: 'smooth'
-                    },
-                    markers: {
-                        size: 6,
-                        colors: ['#465FFF'],
-                        strokeColors: '#fff',
-                        strokeWidth: 2,
-                        hover: {
-                            size: 8
-                        }
-                    },
-                    xaxis: {
-                        categories: last7Days.map(date => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-                        labels: {
-                            style: {
-                                fontFamily: 'Outfit, sans-serif',
-                                fontSize: '12px',
-                                fontWeight: 400,
-                                colors: ['#373d3f']
-                            }
-                        },
-                        axisBorder: {
-                            show: false
-                        },
-                        axisTicks: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            style: {
-                                fontFamily: 'Outfit, sans-serif',
-                                fontSize: '11px',
-                                fontWeight: 400,
-                                colors: ['#373d3f']
-                            }
-                        }
-                    },
-                    colors: ['#465FFF'],
-                    fill: {
-                        type: 'gradient',
-                        gradient: {
-                            shade: 'light',
-                            type: 'vertical',
-                            shadeIntensity: 0.4,
-                            gradientToColors: ['#A3AFFF'],
-                            inverseColors: false,
-                            opacityFrom: 0.5,
-                            opacityTo: 0.1,
-                            stops: [0, 100]
-                        }
-                    },
-                    grid: {
-                        borderColor: '#e0e0e0',
-                        strokeDashArray: 0,
-                        xaxis: {
-                            lines: {
-                                show: false
-                            }
-                        },
-                        yaxis: {
-                            lines: {
-                                show: true
-                            }
-                        }
-                    },
-                    tooltip: {
-                        style: {
-                            fontFamily: 'Outfit, sans-serif'
-                        },
-                        x: {
-                            format: 'MMM dd'
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                };
-
-                window.timelineChart = new ApexCharts(chartElement, options);
-                window.timelineChart.render();
-            } catch (error) {
-                console.error('Error updating timeline chart:', error);
-                showNotification('Error', 'Error updating timeline chart', 'error');
-            }
-        }
+        // function updateTimelineChart(tasks) - REMOVED: Chart not used in current metrics view
 
         // Update metrics when tasks change
         const originalUpdateTaskCounters = updateTaskCounters;
@@ -2241,6 +2055,133 @@
             }
         };
 
+        // Add the missing updateMetricsTable function
+        function updateMetricsTable(tasks) {
+            try {
+                const metricsTableBody = document.getElementById('metrics-table-body');
+                if (!metricsTableBody) {
+                    console.debug('Metrics table body not found');
+                    return;
+                }
+
+                metricsTableBody.innerHTML = '';
+
+                if (!tasks || tasks.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No tasks available</td>
+                    `;
+                    metricsTableBody.appendChild(row);
+                    return;
+                }
+
+                // Calculate overdue tasks (1+ month old)
+                const today = new Date();
+                const oneMonthAgo = new Date(today);
+                oneMonthAgo.setMonth(today.getMonth() - 1);
+
+                const overdueTasks = tasks.filter(task => {
+                    if (task.column === 'done') return false; // Skip completed tasks
+                    
+                    const createdDate = task.createdAt ? new Date(task.createdAt) : null;
+                    const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+                    
+                    // Task is overdue if it's older than 1 month or past due date
+                    const isOldTask = createdDate && createdDate < oneMonthAgo;
+                    const isPastDue = dueDate && dueDate < today;
+                    
+                    return isOldTask || isPastDue;
+                }).sort((a, b) => {
+                    // Sort by creation date (oldest first) or due date
+                    const dateA = new Date(a.createdAt || a.dueDate);
+                    const dateB = new Date(b.createdAt || b.dueDate);
+                    return dateA - dateB;
+                }).slice(0, 10); // Top 10 only
+
+                if (overdueTasks.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td colspan="8" class="px-6 py-4 text-center text-green-600">🎉 No overdue tasks! Great job!</td>
+                    `;
+                    metricsTableBody.appendChild(row);
+                    return;
+                }
+
+                overdueTasks.forEach(task => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-red-50';
+                    
+                    // Calculate days pending
+                    const createdDate = new Date(task.createdAt || task.startDate || Date.now());
+                    const daysPending = Math.floor((today - createdDate) / (1000 * 60 * 60 * 24));
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${task.title}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${task.assignedUser || 'Unassigned'}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${getPriorityBadgeClass(task.priority)}">
+                                ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(task.column)}">
+                                ${getStatusDisplayName(task.column)}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${getTagBadgeClass(task.tag)}">
+                                ${getTagName(task.tag)}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm ${daysPending > 60 ? 'text-red-600 font-bold' : daysPending > 30 ? 'text-orange-600 font-medium' : 'text-gray-600'}">${daysPending}</td>
+                        <td class="px-6 py-4 text-center text-sm text-gray-500">${formatDate(task.createdAt || task.startDate)}</td>
+                        <td class="px-6 py-4 text-center text-sm text-gray-500">${task.dueDate ? formatDate(task.dueDate) : 'Not set'}</td>
+                    `;
+                    metricsTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error updating metrics table:', error);
+            }
+        }
+
+        // Helper function to get tag badge class
+        function getTagBadgeClass(tag) {
+            switch(tag) {
+                case 'blue': return 'bg-blue-100 text-blue-800';     // New Development
+                case 'red': return 'bg-red-100 text-red-800';        // Bug
+                case 'purple': return 'bg-purple-100 text-purple-800'; // Design
+                case 'green': return 'bg-green-100 text-green-800';   // Enhancement
+                case 'yellow': return 'bg-yellow-100 text-yellow-800'; // Ad Hoc
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // Enhanced chart initialization with better error handling
+        function initializeCharts() {
+            console.log('Initializing charts...');
+            
+            // Check if ApexCharts is available
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts library not loaded');
+                setTimeout(initializeCharts, 1000); // Retry in 1 second
+                return;
+            }
+            
+            console.log('ApexCharts library available, charts can be rendered');
+        }
+
+        // Initialize charts when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+        });
+
+        // Also try to initialize charts immediately if DOM is already ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCharts);
+        } else {
+            initializeCharts();
+        }
+
         // Initialize metrics when metrics tab is clicked
         // Removed the following event listener as it's redundant with the Alpine watcher
         /*
@@ -2253,88 +2194,18 @@
         });
         */
 
-        // Also initialize metrics after initial data load
+        // Also initialize metrics after initial data load with longer delay to ensure everything is ready
         setTimeout(() => {
             try {
                 const alpineElement = document.querySelector('[x-data]');
                 if (alpineElement && alpineElement.__x && alpineElement.__x.$data && alpineElement.__x.$data.activeView === 'metrics') {
-                    updateMetrics();
+                    console.log('Initial metrics check: activeView is metrics, updating with no notifications.');
+                    updateMetrics(false); // Pass false to avoid redundant notifications
                 }
             } catch (error) {
                 console.debug('Alpine.js not ready for initial metrics update');
             }
-        }, 2000);
-        });
-
-        // Update notification function to handle error type
-        function showNotification(title, message, type = 'notification') {
-            const container = document.getElementById('notificationsContainer');
-            const notification = document.createElement('div');
-            
-            const bgColor = type === 'error' 
-                ? 'bg-red-100' 
-                : type === 'message' 
-                    ? 'bg-blue-100' 
-                    : type === 'success'
-                        ? 'bg-green-100'
-                        : 'bg-green-100';
-            
-            const iconColor = type === 'error'
-                ? 'text-red-600'
-                : type === 'message'
-                    ? 'text-blue-600'
-                    : type === 'success'
-                        ? 'text-green-600'
-                        : 'text-green-600';
-
-            const icon = type === 'error'
-                ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>`
-                : type === 'message'
-                    ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                    </svg>`
-                    : type === 'success'
-                        ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>`
-                        : `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                        </svg>`;
-
-            notification.className = `flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg notification-item`;
-            
-            notification.innerHTML = `
-                <div class="flex h-10 w-10 items-center justify-center rounded-full ${bgColor}">
-                    ${icon}
-                </div>
-                <div class="flex-1">
-                    <h4 class="!text-md font-medium text-gray-900">${title}</h4>
-                    <p class="!text-md text-gray-500">${message}</p>
-                </div>
-                <button class="text-gray-400 hover:text-gray-500 close-notification">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            `;
-
-            container.appendChild(notification);
-
-            // Add close button functionality
-            const closeButton = notification.querySelector('.close-notification');
-            closeButton.addEventListener('click', () => {
-                notification.remove();
-            });
-
-            // Auto close after 5 seconds
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 5000);
-        }
+        }, 3000); // Increased delay to 3 seconds
 
         // Feedback form functions
         function toggleFeedbackForm() {
@@ -2649,11 +2520,14 @@
             const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
             
             if (daysDiff < 0) {
-                return `${Math.abs(daysDiff)} days overdue`;
+                const overdueDays = Math.abs(daysDiff);
+                return overdueDays === 1 ? '1 day overdue' : `${overdueDays} days overdue`;
             } else if (daysDiff === 0) {
-                return 'Due today';
+                return 'Today';
+            } else if (daysDiff === 1) {
+                return '1 day';
             } else {
-                return daysDiff;
+                return `${daysDiff} days`;
             }
         }
 
@@ -2697,16 +2571,32 @@
 
         // Helper function to update table view
         async function updateTableView() {
+            if (isUpdatingTable) {
+                console.log('Table update already in progress, skipping...');
+                return;
+            }
+            
+            isUpdatingTable = true;
             const tableBody = document.getElementById('table-body');
-            tableBody.innerHTML = '';
-
+            
             try {
+                console.log('Updating table view...');
+                tableBody.innerHTML = '';
+
                 const tasks = await fetchTasks();
                 
                 if (!tasks || tasks.length === 0) {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No tasks available or failed to load.</td>
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                            <div class="flex flex-col items-center py-8">
+                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <p class="text-lg font-medium text-gray-900">No tasks available</p>
+                                <p class="text-sm text-gray-500">Create your first task to get started</p>
+                            </div>
+                        </td>
                     `;
                     tableBody.appendChild(row);
                     return;
@@ -2738,6 +2628,17 @@
                     tableBody.appendChild(row);
                 });
                 
+                // Show data source indicator if using fallback data
+                if (usingFallbackData) {
+                    const infoRow = document.createElement('tr');
+                    infoRow.innerHTML = `
+                        <td colspan="8" class="px-6 py-2 text-center text-sm text-blue-600 bg-blue-50 border-t border-blue-200">
+                            ℹ️ Using sample data (unable to connect to live data source)
+                        </td>
+                    `;
+                    tableBody.appendChild(infoRow);
+                }
+                
                 // Reapply search filter if one is active
                 if (typeof applySearchFilter === 'function') {
                     applySearchFilter();
@@ -2746,9 +2647,22 @@
                 console.error('Error loading table data:', error);
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td colspan="8" class="px-6 py-4 text-center text-red-500">Error loading tasks. Please try again.</td>
+                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                        <div class="flex flex-col items-center py-8">
+                            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                            <p class="text-lg font-medium text-gray-900">Unable to load tasks</p>
+                            <p class="text-sm text-gray-500 mb-4">There was an issue loading the task data</p>
+                            <button onclick="location.reload()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                Try Again
+                            </button>
+                        </div>
+                    </td>
                 `;
                 tableBody.appendChild(row);
+            } finally {
+                isUpdatingTable = false;
             }
         }
 
@@ -2837,16 +2751,24 @@
                 // Show modal
                 document.getElementById('task-modal').classList.remove('hidden');
                 
-                // Hide menu
-                document.getElementById(`menu-${taskId}`).classList.add('hidden');
+                // Hide menu if it exists
+                const menuElement = document.getElementById(`menu-${taskId}`);
+                if (menuElement) {
+                    menuElement.classList.add('hidden');
+                }
             } catch (error) {
                 console.error('Error loading task data for editing:', error);
                 showNotification('Error', 'Error loading task data', 'error');
             }
         }
 
+        // Make editTask globally accessible
+        window.editTask = editTask;
+
         // Delete task function
         async function deleteTask(taskId) {
+            console.log('deleteTask called for:', taskId);
+            
             // Hide menu first
             const menuElement = document.getElementById(`menu-${taskId}`);
             if (menuElement) {
@@ -2855,24 +2777,47 @@
             
             if (confirm('Are you sure you want to delete this task?')) {
                 try {
+                    // First, immediately remove the task card from the UI for instant feedback
+                    const taskCard = document.querySelector(`[data-id="${taskId}"]`);
+                    if (taskCard) {
+                        console.log('Removing task card from UI:', taskId);
+                        taskCard.remove();
+                        updateTaskCounters(); // Update counters immediately
+                    }
+                    
+                    // Then update the server data
+                    console.log('Updating server data...');
                     const tasks = await fetchTasks();
                     const taskToDelete = tasks.find(task => task.id === taskId);
                     
                     if (!taskToDelete) {
-                        showNotification('Error', 'Task not found', 'error');
+                        console.warn('Task not found in server data:', taskId);
+                        showNotification('Warning', 'Task was removed from view but may not exist on server', 'error');
                         return;
                     }
                     
                     const updatedTasks = tasks.filter(task => task.id !== taskId);
                     await saveTasks(updatedTasks, false);
-                    await loadTasksFromConfluence(false);
+                    
+                    // Update table view if we're in table view
+                    await updateTableView();
+                    
+                    console.log('Task deleted successfully:', taskId);
                     showNotification('Success', 'Task deleted successfully', 'success');
                 } catch (error) {
                     console.error('Error deleting task:', error);
+                    
+                    // If there was an error, we should reload to make sure UI is in sync
+                    console.log('Error occurred, reloading tasks to ensure UI sync...');
+                    await loadTasksFromConfluence(false);
+                    
                     showNotification('Error', 'Error deleting task. Please try again.', 'error');
                 }
             }
         }
+
+        // Make deleteTask globally accessible
+        window.deleteTask = deleteTask;
 
         // Export to Excel function
         document.getElementById('export-excel').addEventListener('click', async function() {
@@ -3132,74 +3077,157 @@
             lifecycleHistoryModal.classList.add('hidden');
         });
 
+        // Function to create a single timeline entry for lifecycle history
+        function createTimelineEntry(entry, isLastEntry = false) {
+            const li = document.createElement('li');
+            li.className = `mb-8 ms-6 ${isLastEntry ? '' : 'pb-4'}`; // Added padding-bottom for spacing, remove for last
+
+            const iconContainer = document.createElement('span');
+            iconContainer.className = 'absolute flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full -start-4 ring-4 ring-white';
+            
+            const iconSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            iconSVG.setAttribute('class', 'w-4 h-4 text-blue-600');
+            iconSVG.setAttribute('fill', 'currentColor');
+            iconSVG.setAttribute('viewBox', '0 0 20 20');
+            iconSVG.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clip-rule="evenodd"></path>';
+            iconContainer.appendChild(iconSVG);
+            li.appendChild(iconContainer);
+
+            const time = document.createElement('time');
+            time.className = 'block mb-1 text-sm font-normal leading-none text-gray-500';
+            time.textContent = formatDateTime(entry.timestamp); // Assuming formatDateTime exists
+            li.appendChild(time);
+
+            const title = document.createElement('h3');
+            title.className = 'text-lg font-semibold text-gray-900';
+            let statusChange = 'Status Updated';
+            if (entry.fromStatus && entry.toStatus) {
+                statusChange = `${getStatusDisplayName(entry.fromStatus)} → ${getStatusDisplayName(entry.toStatus)}`;
+            } else if (entry.toStatus) {
+                statusChange = `Created & Moved to ${getStatusDisplayName(entry.toStatus)}`;
+            }
+            title.textContent = statusChange;
+            li.appendChild(title);
+            
+            if (entry.updateType) {
+                const typePara = document.createElement('p');
+                typePara.className = 'text-sm font-normal text-gray-600';
+                typePara.textContent = `Type: ${entry.updateType.charAt(0).toUpperCase() + entry.updateType.slice(1)}`;
+                li.appendChild(typePara);
+            }
+
+            if (entry.comments) {
+                const commentPara = document.createElement('p');
+                commentPara.className = 'mt-1 text-sm font-normal text-gray-600 bg-gray-50 p-2 rounded-md';
+                commentPara.textContent = entry.comments;
+                li.appendChild(commentPara);
+            }
+            
+            if (entry.updatedBy) {
+                const userPara = document.createElement('p');
+                userPara.className = 'mt-2 text-xs font-medium text-gray-500';
+                userPara.textContent = `Updated by: ${entry.updatedBy}`;
+                li.appendChild(userPara);
+            }
+
+            return li;
+        }
+        
+        // Helper to format date and time
+        function formatDateTime(isoString) {
+            if (!isoString) return 'Date N/A';
+            try {
+                const date = new Date(isoString);
+                return date.toLocaleString('en-US', { 
+                    year: 'numeric', month: 'short', day: 'numeric', 
+                    hour: '2-digit', minute: '2-digit', hour12: true 
+                });
+            } catch (e) {
+                return isoString; // Return original if parsing fails
+            }
+        }
+
         // Function to view lifecycle history
         async function viewLifecycleHistory(taskId) {
+            console.log('viewLifecycleHistory called with taskId:', taskId);
+            
             try {
                 const tasks = await fetchTasks();
                 const task = tasks.find(t => t.id === taskId);
                 
                 if (!task) {
+                    console.error('Task not found:', taskId);
                     showNotification('Error', 'Task not found', 'error');
                     return;
                 }
 
+                console.log('Task found:', task);
+                console.log('Task lifecycle:', task.lifecycle);
+
+                // Get modal elements and check if they exist
+                const modal = document.getElementById('lifecycle-history-modal');
+                const titleElement = document.getElementById('history-task-title');
+                const statusElement = document.getElementById('history-current-status');
+                const updatedElement = document.getElementById('history-last-updated');
+                const timeline = document.getElementById('lifecycle-timeline');
+
+                if (!modal) {
+                    console.error('lifecycle-history-modal not found');
+                    showNotification('Error', 'Modal not found', 'error');
+                    return;
+                }
+
+                console.log('Modal elements found, populating...');
+
                 // Populate modal header
-                document.getElementById('history-task-title').textContent = task.title;
-                document.getElementById('history-current-status').textContent = getStatusDisplayName(task.column);
-                document.getElementById('history-last-updated').textContent = formatDateTime(task.updatedAt);
+                if (titleElement) titleElement.textContent = task.title;
+                if (statusElement) statusElement.textContent = getStatusDisplayName(task.column);
+                if (updatedElement) updatedElement.textContent = formatDateTime(task.updatedAt);
 
                 // Populate timeline
-                const timeline = document.getElementById('lifecycle-timeline');
-                timeline.innerHTML = '';
+                if (timeline) {
+                    timeline.innerHTML = '';
 
-                if (task.lifecycle && task.lifecycle.length > 0) {
-                    // Sort lifecycle entries by timestamp (newest first)
-                    const sortedLifecycle = [...task.lifecycle].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    
-                    // Create timeline container
-                    const timelineContainer = document.createElement('ol');
-                    timelineContainer.className = 'relative border-s border-gray-200';
-                    
-                    sortedLifecycle.forEach((entry, index) => {
-                        const timelineEntry = createTimelineEntry(entry, index === sortedLifecycle.length - 1);
-                        timelineContainer.appendChild(timelineEntry);
-                    });
-                    
-                    timeline.appendChild(timelineContainer);
-                } else {
-                    timeline.innerHTML = '<p class="text-gray-500 text-center py-4">No lifecycle history available</p>';
+                    if (task.lifecycle && task.lifecycle.length > 0) {
+                        console.log('Task has lifecycle data, creating timeline...');
+                        // Sort lifecycle entries by timestamp (newest first)
+                        const sortedLifecycle = [...task.lifecycle].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        
+                        // Create timeline container
+                        const timelineContainer = document.createElement('ol');
+                        timelineContainer.className = 'relative border-s border-gray-200';
+                        
+                        sortedLifecycle.forEach((entry, index) => {
+                            const timelineEntry = createTimelineEntry(entry, index === sortedLifecycle.length - 1);
+                            timelineContainer.appendChild(timelineEntry);
+                        });
+                        
+                        timeline.appendChild(timelineContainer);
+                    } else {
+                        console.log('No lifecycle data found for task');
+                        timeline.innerHTML = '<p class="text-gray-500 text-center py-4">No lifecycle history available</p>';
+                    }
                 }
 
                 // Show modal
-                lifecycleHistoryModal.classList.remove('hidden');
+                console.log('Showing modal...');
+                modal.classList.remove('hidden');
                 
                 // Hide task menu if it exists
                 const taskMenu = document.getElementById(`menu-${taskId}`);
                 if (taskMenu) {
                     taskMenu.classList.add('hidden');
                 }
+                
+                console.log('Modal should now be visible');
             } catch (error) {
                 console.error('Error loading lifecycle history:', error);
-                console.error('Error updating metrics table:', error);
-                showNotification('Error', 'Error updating metrics table', 'error');
+                showNotification('Error', 'Error loading lifecycle history. Please try again.', 'error');
             }
         }
 
-        // Update metrics when tasks change
-        const originalUpdateTaskCounters = updateTaskCounters;
-        updateTaskCounters = function() {
-            originalUpdateTaskCounters();
-            // Only update metrics if metrics view is active
-            try {
-                const alpineElement = document.querySelector('[x-data]');
-                if (alpineElement && alpineElement.__x && alpineElement.__x.$data && alpineElement.__x.$data.activeView === 'metrics') {
-                    updateMetrics(); // This calls with showNotifications=true by default
-                }
-            } catch (error) {
-                // Silently ignore Alpine.js access errors during initialization
-                console.debug('Alpine.js not ready for metrics update');
-            }
-        };
+        // Make viewLifecycleHistory globally accessible
+        window.viewLifecycleHistory = viewLifecycleHistory;
 
         // Show task context menu on right-click
         function showTaskMenu(event, taskId) {
@@ -3236,11 +3264,14 @@
         let currentCalendarDate = new Date();
         let currentCalendarView = 'month'; // month, week, day
 
-        function updateCalendar() {
+        function updateCalendarReal() {
             console.log('Updating calendar view:', currentCalendarView);
             updateCalendarHeader();
             generateCalendarGrid();
         }
+
+        // Register the real updateCalendar function with the stub system
+        registerRealUpdateCalendar(updateCalendarReal);
 
         function updateCalendarView(view) {
             currentCalendarView = view;
@@ -3272,8 +3303,11 @@
                 }
             }
             
-            updateCalendar();
+            updateCalendarReal();
         }
+
+        // Make updateCalendarView globally accessible for Alpine.js
+        window.updateCalendarView = updateCalendarView;
 
         function updateCalendarHeader() {
             const monthYear = document.getElementById('calendar-month-year');
@@ -3414,7 +3448,9 @@
             dayDiv.appendChild(dayHeader);
 
             // Find tasks for this date
-            const dateString = date.toISOString().split('T')[0];
+            const dateString = date.getFullYear() + '-' + 
+                String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(date.getDate()).padStart(2, '0');
             const dayTasks = tasks.filter(task => {
                 return task.dueDate === dateString || task.startDate === dateString;
             });
@@ -3484,8 +3520,168 @@
 
         // Initialize calendar when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            updateCalendar();
-        });
+                updateCalendarReal();
+            });
+        }); // Close main DOMContentLoaded event listener
+
+        function createCalendarDay(date, month, tasks, isWeekView = false) {
+            const dayDiv = document.createElement('div');
+            const isToday = date.toDateString() === new Date().toDateString();
+            const isCurrentMonth = date.getMonth() === month;
+
+            // Base styling for day cell
+            dayDiv.className = `min-h-[120px] p-2 border-r border-b border-gray-200 relative ${
+                isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+            } ${isToday ? 'bg-blue-50 border-blue-300' : ''} hover:bg-gray-50 transition-colors`;
+
+            // Day number at the top
+            const dayNumber = document.createElement('div');
+            dayNumber.className = `text-sm font-medium mb-2 flex items-center gap-1 ${
+                isCurrentMonth 
+                    ? (isToday ? 'text-blue-600 font-bold' : 'text-gray-900') 
+                    : 'text-gray-400'
+            }`;
+            
+            if (isToday) {
+                dayNumber.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span>${date.getDate()}`;
+            } else {
+                dayNumber.textContent = date.getDate();
+            }
+            dayDiv.appendChild(dayNumber);
+
+            // Find tasks for this specific date
+            const dateString = date.getFullYear() + '-' + 
+                String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(date.getDate()).padStart(2, '0');
+            const dayTasks = tasks.filter(task => {
+                return task.dueDate === dateString || task.startDate === dateString;
+            });
+
+            // Tasks container
+            const tasksContainer = document.createElement('div');
+            tasksContainer.className = 'space-y-1 overflow-hidden';
+            
+            if (dayTasks.length === 0) {
+                // Empty day - just add some minimal spacing
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'h-4';
+                tasksContainer.appendChild(emptyDiv);
+            } else {
+                // Show up to 3 tasks, then a "more" indicator
+                const visibleTasks = dayTasks.slice(0, 3);
+                const remainingCount = dayTasks.length - 3;
+                
+                visibleTasks.forEach((task, index) => {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'mb-1 px-2 py-1 rounded text-xs font-medium cursor-pointer flex items-center gap-1 transition-all duration-200 hover:scale-105 hover:shadow-sm border border-transparent hover:border-gray-300';
+                    taskDiv.title = `${task.title} - ${task.assignedUser || 'Unassigned'} - Priority: ${task.priority}`;
+                    
+                    // Status indicator dot
+                    const statusDot = document.createElement('span');
+                    statusDot.className = 'inline-block w-2 h-2 rounded-full flex-shrink-0';
+                    
+                    // Set status color
+                    switch(task.column) {
+                        case 'todo':
+                            statusDot.className += ' bg-red-500';
+                            taskDiv.className += ' bg-red-50 text-red-800 hover:bg-red-100';
+                            break;
+                        case 'progress':
+                            statusDot.className += ' bg-blue-500';
+                            taskDiv.className += ' bg-blue-50 text-blue-800 hover:bg-blue-100';
+                            break;
+                        case 'review':
+                            statusDot.className += ' bg-orange-500';
+                            taskDiv.className += ' bg-orange-50 text-orange-800 hover:bg-orange-100';
+                            break;
+                        case 'done':
+                            statusDot.className += ' bg-green-500';
+                            taskDiv.className += ' bg-green-50 text-green-800 hover:bg-green-100';
+                            break;
+                        default:
+                            statusDot.className += ' bg-gray-500';
+                            taskDiv.className += ' bg-gray-50 text-gray-800 hover:bg-gray-100';
+                    }
+                    
+                    // Task title (truncated)
+                    const titleSpan = document.createElement('span');
+                    titleSpan.className = 'truncate flex-1 text-xs';
+                    titleSpan.textContent = task.title;
+                    
+                    // Priority indicator (small badge)
+                    let priorityColor = '';
+                    switch(task.priority) {
+                        case 'urgent':
+                            priorityColor = 'bg-red-600 text-white';
+                            break;
+                        case 'high':
+                            priorityColor = 'bg-orange-500 text-white';
+                            break;
+                        case 'medium':
+                            priorityColor = 'bg-yellow-500 text-white';
+                            break;
+                        case 'low':
+                            priorityColor = 'bg-blue-500 text-white';
+                            break;
+                        default:
+                            priorityColor = 'bg-gray-400 text-white';
+                    }
+                    
+                    const priorityDot = document.createElement('span');
+                    priorityDot.className = `inline-block w-1 h-1 rounded-full flex-shrink-0 ${priorityColor}`;
+                    priorityDot.title = `Priority: ${task.priority}`;
+                    
+                    // Assemble task element
+                    taskDiv.appendChild(statusDot);
+                    taskDiv.appendChild(titleSpan);
+                    taskDiv.appendChild(priorityDot);
+                    
+                    // Click handler to edit task
+                    taskDiv.onclick = function(e) {
+                        e.stopPropagation();
+                        console.log('Calendar task clicked:', task.id, task.title);
+                        if (typeof window.editTask === 'function') {
+                            window.editTask(task.id);
+                        } else if (typeof editTask === 'function') {
+                            editTask(task.id);
+                        } else {
+                            console.error('editTask function not found');
+                            showNotification('Error', 'Task editing function not available', 'error');
+                        }
+                    };
+                    
+                    tasksContainer.appendChild(taskDiv);
+                });
+                
+                // Show "more" indicator if there are additional tasks
+                if (remainingCount > 0) {
+                    const moreDiv = document.createElement('div');
+                    moreDiv.className = 'px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors';
+                    moreDiv.textContent = `+${remainingCount} more`;
+                    moreDiv.title = `${remainingCount} additional tasks on this day`;
+                    moreDiv.onclick = function(e) {
+                        e.stopPropagation();
+                        // Could show a modal with all tasks for this day
+                        console.log(`Show all ${dayTasks.length} tasks for ${dateString}`);
+                    };
+                    tasksContainer.appendChild(moreDiv);
+                }
+            }
+            
+            dayDiv.appendChild(tasksContainer);
+            
+            // Add a subtle indicator for days with tasks
+            if (dayTasks.length > 0 && isCurrentMonth) {
+                const indicator = document.createElement('div');
+                indicator.className = 'absolute bottom-1 right-1 w-2 h-2 bg-blue-400 rounded-full opacity-60';
+                dayDiv.appendChild(indicator);
+            }
+            
+            return dayDiv;
+        }
+
+        // Make deleteTask globally accessible
+        window.deleteTask = deleteTask;
     </script>
 </body>
 </html>
