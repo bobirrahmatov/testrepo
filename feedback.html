@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+    <!-- Feedback Button -->
+    <button onclick="toggleFeedbackForm()" class="fixed left-4 bottom-4 z-50 flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+        </svg>
+        Feedback
+    </button>
+
+    <!-- Feedback Form Modal -->
+    <div id="feedbackModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="toggleFeedbackForm()"></div>
+        <div class="fixed left-4 bottom-4 w-full max-w-md">
+            <div class="rounded-2xl border border-gray-200 bg-white">
+                <div class="px-5 py-4 sm:px-6 sm:py-5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-medium text-gray-800">
+                            Feedback Form
+                        </h3>
+                        <button onclick="toggleFeedbackForm()" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-5 space-y-6 border-t border-gray-100 sm:p-6">
+                    <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                        <div class="-mx-2.5 flex flex-wrap gap-y-5">
+                            <div class="w-full px-2.5">
+                                <input type="text" id="feedbackName" placeholder="Your Name (Optional)"
+                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                            </div>
+
+                            <div class="w-full px-2.5">
+                                <select id="feedbackType" required
+                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                    <option value="">Select Feedback Type</option>
+                                    <option value="suggestion">Suggestion</option>
+                                    <option value="bug">Bug Report</option>
+                                    <option value="improvement">Improvement</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="w-full px-2.5">
+                                <textarea id="feedbackMessage" placeholder="Your Feedback" required rows="4"
+                                    class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                            </div>
+
+                            <div class="w-full px-2.5">
+                                <button type="submit" class="w-full p-3 text-sm font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
+                                    Submit Feedback
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Component -->
+    <div class="fixed bottom-4 right-4 z-50" id="notificationsContainer">
+        <div class="flex flex-col gap-4">
+            <!-- Notifications will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        // Update notification function to handle error type
+        function showNotification(title, message, type = 'notification') {
+            const container = document.getElementById('notificationsContainer');
+            const notification = document.createElement('div');
+            
+            const bgColor = type === 'error' 
+                ? 'bg-red-100' 
+                : type === 'message' 
+                    ? 'bg-blue-100' 
+                    : 'bg-green-100';
+            
+            const iconColor = type === 'error'
+                ? 'text-red-600'
+                : type === 'message'
+                    ? 'text-blue-600'
+                    : 'text-green-600';
+
+            const icon = type === 'error'
+                ? `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>`
+                : type === 'message'
+                    ? `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                    </svg>`
+                    : `<svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>`;
+
+            notification.className = `flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg notification-item`;
+            
+            notification.innerHTML = `
+                <div class="flex h-10 w-10 items-center justify-center rounded-full ${bgColor}">
+                    ${icon}
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-medium text-gray-900">${title}</h4>
+                    <p class="text-sm text-gray-500">${message}</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-500 close-notification">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+
+            container.appendChild(notification);
+
+            // Add close button functionality
+            const closeButton = notification.querySelector('.close-notification');
+            closeButton.addEventListener('click', () => {
+                notification.remove();
+            });
+
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Feedback form functions
+        function toggleFeedbackForm() {
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.toggle('hidden');
+        }
+
+        async function submitFeedback(event) {
+            event.preventDefault();
+            
+            const feedbackData = {
+                id: `fb_${Date.now()}`,
+                name: document.getElementById('feedbackName').value || 'Anonymous',
+                type: document.getElementById('feedbackType').value,
+                message: document.getElementById('feedbackMessage').value,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                // First, get the attachment ID for feedback.json
+                const attachmentsResponse = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment?filename=feedback.json');
+                const attachmentsData = await attachmentsResponse.json();
+                
+                let attachmentId;
+                let existingFeedback = { feedback: [], metadata: { lastUpdated: '', totalFeedback: 0, feedbackTypes: {} } };
+
+                if (attachmentsData.results && attachmentsData.results.length > 0) {
+                    // If feedback.json exists, get its content
+                    attachmentId = attachmentsData.results[0].id;
+                    const feedbackResponse = await fetch(`https://cedt-confluence.net/confluence/download/attachments/2740868871/feedback.json?api=v2`);
+                    if (feedbackResponse.ok) {
+                        existingFeedback = await feedbackResponse.json();
+                    }
+                }
+
+                // Add new feedback
+                existingFeedback.feedback.unshift(feedbackData);
+
+                // Update metadata
+                existingFeedback.metadata = {
+                    lastUpdated: feedbackData.timestamp,
+                    totalFeedback: existingFeedback.feedback.length,
+                    feedbackTypes: existingFeedback.feedback.reduce((acc, fb) => {
+                        acc[fb.type] = (acc[fb.type] || 0) + 1;
+                        return acc;
+                    }, {})
+                };
+
+                // Create or update the attachment
+                const formData = new FormData();
+                const blob = new Blob([JSON.stringify(existingFeedback, null, 2)], { type: 'application/json' });
+                formData.append('file', blob, 'feedback.json');
+
+                const response = await fetch(`https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment${attachmentId ? `/${attachmentId}` : ''}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Atlassian-Token': 'no-check'
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to save feedback: ${response.status} ${response.statusText}`);
+                }
+
+                showNotification('Success', 'Thank you for your feedback!', 'success');
+                document.getElementById('feedbackForm').reset();
+                toggleFeedbackForm();
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                showNotification('Error', 'Failed to submit feedback. Please try again.', 'error');
+            }
+        }
+
+        // Add click handlers for the close buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.close-notification').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const notification = e.target.closest('.notification-item');
+                    if (notification) {
+                        notification.remove();
+                    }
+                });
+            });
+
+            // Auto close existing notifications after 5 seconds
+            document.querySelectorAll('.notification-item').forEach(notification => {
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
