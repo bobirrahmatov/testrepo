@@ -213,6 +213,9 @@
         async function submitFeedback(event) {
             event.preventDefault();
             
+            // Close the feedback form immediately
+            toggleFeedbackForm();
+            
             const feedbackData = {
                 id: `fb_${Date.now()}`,
                 name: document.getElementById('feedbackName').value || 'Anonymous',
@@ -271,7 +274,6 @@
 
                 showNotification('Success', 'Thank you for your feedback!', 'success');
                 document.getElementById('feedbackForm').reset();
-                toggleFeedbackForm();
             } catch (error) {
                 console.error('Error submitting feedback:', error);
                 showNotification('Error', 'Failed to submit feedback. Please try again.', 'error');
