@@ -140,6 +140,33 @@
     </div>
 
     <div class="p-4">
+        <!-- Demo Mode Banner (hidden by default) -->
+        <div id="demo-mode-banner" class="mb-4 hidden">
+            <div class="rounded-lg bg-blue-50 border border-blue-200 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h3 class="text-sm font-medium text-blue-800">Demo Mode Active</h3>
+                        <div class="mt-1 text-sm text-blue-700">
+                            <p>You're viewing sample data because the Confluence server is not accessible. All changes will be saved locally in your browser.</p>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-shrink-0">
+                        <button type="button" id="close-demo-banner" class="inline-flex text-blue-400 hover:text-blue-600 focus:outline-none">
+                            <span class="sr-only">Close</span>
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="rounded-2xl border border-gray-200 bg-white">
             <div class="px-5 py-4 sm:px-6 sm:py-5">
                 <h3 class="!text-2xl font-medium text-gray-800">
@@ -1036,20 +1063,261 @@
                 }
                 
             } catch (error) {
-                // Log the error and re-throw it to be caught by the caller for network/parsing errors.
+                // Log the error and provide fallback dummy data
                 console.warn('Error fetching tasks from Confluence:', error);
                 console.warn('Error details:', {
                     message: error.message,
                     name: error.name,
-                    // stack: error.stack // Stack can be very long, omitting for brevity
                 });
-                throw error; // Re-throw the error to be handled by the caller
+                console.warn('Falling back to dummy data for demonstration purposes...');
+                
+                // Check if we have saved fallback data in localStorage first
+                try {
+                    const savedData = localStorage.getItem('kanban_fallback_tasks');
+                    if (savedData) {
+                        const parsedData = JSON.parse(savedData);
+                        if (parsedData.tasks && Array.isArray(parsedData.tasks) && parsedData.tasks.length > 0) {
+                            console.log('Found saved fallback data in localStorage:', parsedData.tasks.length, 'tasks');
+                            return parsedData.tasks;
+                        }
+                    }
+                } catch (localStorageError) {
+                    console.warn('Error reading from localStorage:', localStorageError);
+                }
+                
+                // Return fallback dummy data if no saved data
+                return getFallbackTasks();
             }
+        }
+
+        // Function to generate fallback dummy data when Confluence is not accessible
+        function getFallbackTasks() {
+            const currentTime = new Date().toISOString();
+            const users = ['User 1', 'User 2', 'User 3', 'User 4', 'User 5'];
+            const tags = ['blue', 'red', 'purple', 'green', 'yellow'];
+            const priorities = ['low', 'medium', 'high', 'urgent'];
+            const columns = ['todo', 'progress', 'review', 'done'];
+            
+            const sampleTasks = [
+                {
+                    id: 'task_1',
+                    title: 'Implement user authentication system',
+                    description: 'Create a secure login and registration system with password hashing and session management.',
+                    tag: 'blue',
+                    priority: 'high',
+                    assignedUser: 'User 1',
+                    submittedBy: 'User 2',
+                    startDate: '2024-01-15',
+                    dueDate: '2024-02-15',
+                    column: 'progress',
+                    createdAt: '2024-01-15T08:00:00.000Z',
+                    updatedAt: currentTime,
+                    lifecycle: [
+                        {
+                            id: 'lc_1',
+                            timestamp: '2024-01-15T08:00:00.000Z',
+                            fromStatus: null,
+                            toStatus: 'todo',
+                            updateType: 'creation',
+                            comments: 'Task created',
+                            updatedBy: 'User 2'
+                        },
+                        {
+                            id: 'lc_2',
+                            timestamp: '2024-01-20T10:30:00.000Z',
+                            fromStatus: 'todo',
+                            toStatus: 'progress',
+                            updateType: 'progress',
+                            comments: 'Started working on authentication framework',
+                            updatedBy: 'User 1'
+                        }
+                    ]
+                },
+                {
+                    id: 'task_2',
+                    title: 'Fix payment gateway integration bug',
+                    description: 'Resolve the issue where payment confirmations are not being properly processed.',
+                    tag: 'red',
+                    priority: 'urgent',
+                    assignedUser: 'User 3',
+                    submittedBy: 'User 4',
+                    startDate: '2024-01-20',
+                    dueDate: '2024-01-25',
+                    column: 'review',
+                    createdAt: '2024-01-20T09:15:00.000Z',
+                    updatedAt: currentTime,
+                    lifecycle: [
+                        {
+                            id: 'lc_3',
+                            timestamp: '2024-01-20T09:15:00.000Z',
+                            fromStatus: null,
+                            toStatus: 'todo',
+                            updateType: 'creation',
+                            comments: 'Critical bug reported by customer support',
+                            updatedBy: 'User 4'
+                        },
+                        {
+                            id: 'lc_4',
+                            timestamp: '2024-01-21T11:00:00.000Z',
+                            fromStatus: 'todo',
+                            toStatus: 'progress',
+                            updateType: 'progress',
+                            comments: 'Identified root cause in webhook handling',
+                            updatedBy: 'User 3'
+                        },
+                        {
+                            id: 'lc_5',
+                            timestamp: '2024-01-23T16:45:00.000Z',
+                            fromStatus: 'progress',
+                            toStatus: 'review',
+                            updateType: 'review',
+                            comments: 'Fix implemented and ready for testing',
+                            updatedBy: 'User 3'
+                        }
+                    ]
+                },
+                {
+                    id: 'task_3',
+                    title: 'Design new landing page layout',
+                    description: 'Create mockups and wireframes for the updated company landing page.',
+                    tag: 'purple',
+                    priority: 'medium',
+                    assignedUser: 'User 5',
+                    submittedBy: 'User 1',
+                    startDate: '2024-01-10',
+                    dueDate: '2024-02-01',
+                    column: 'done',
+                    createdAt: '2024-01-10T14:20:00.000Z',
+                    updatedAt: currentTime,
+                    lifecycle: [
+                        {
+                            id: 'lc_6',
+                            timestamp: '2024-01-10T14:20:00.000Z',
+                            fromStatus: null,
+                            toStatus: 'todo',
+                            updateType: 'creation',
+                            comments: 'Marketing team requested new design',
+                            updatedBy: 'User 1'
+                        },
+                        {
+                            id: 'lc_7',
+                            timestamp: '2024-01-25T13:30:00.000Z',
+                            fromStatus: 'todo',
+                            toStatus: 'done',
+                            updateType: 'completion',
+                            comments: 'Design approved by stakeholders',
+                            updatedBy: 'User 5'
+                        }
+                    ]
+                },
+                {
+                    id: 'task_4',
+                    title: 'Optimize database query performance',
+                    description: 'Analyze and improve slow queries affecting user dashboard load times.',
+                    tag: 'green',
+                    priority: 'high',
+                    assignedUser: 'User 2',
+                    submittedBy: 'User 3',
+                    startDate: '2024-01-18',
+                    dueDate: '2024-02-10',
+                    column: 'todo',
+                    createdAt: '2024-01-18T11:45:00.000Z',
+                    updatedAt: currentTime,
+                    lifecycle: [
+                        {
+                            id: 'lc_8',
+                            timestamp: '2024-01-18T11:45:00.000Z',
+                            fromStatus: null,
+                            toStatus: 'todo',
+                            updateType: 'creation',
+                            comments: 'Performance monitoring flagged slow queries',
+                            updatedBy: 'User 3'
+                        }
+                    ]
+                },
+                {
+                    id: 'task_5',
+                    title: 'Research competitor pricing strategies',
+                    description: 'Conduct market analysis of competitor pricing models and recommendations.',
+                    tag: 'yellow',
+                    priority: 'low',
+                    assignedUser: 'User 4',
+                    submittedBy: 'User 5',
+                    startDate: '2024-01-22',
+                    dueDate: '2024-03-01',
+                    column: 'progress',
+                    createdAt: '2024-01-22T16:00:00.000Z',
+                    updatedAt: currentTime,
+                    lifecycle: [
+                        {
+                            id: 'lc_9',
+                            timestamp: '2024-01-22T16:00:00.000Z',
+                            fromStatus: null,
+                            toStatus: 'todo',
+                            updateType: 'creation',
+                            comments: 'Sales team requested market research',
+                            updatedBy: 'User 5'
+                        },
+                        {
+                            id: 'lc_10',
+                            timestamp: '2024-01-28T09:15:00.000Z',
+                            fromStatus: 'todo',
+                            toStatus: 'progress',
+                            updateType: 'progress',
+                            comments: 'Started collecting competitor data',
+                            updatedBy: 'User 4'
+                        }
+                    ]
+                },
+                {
+                    id: 'task_6',
+                    title: 'Update API documentation',
+                    description: 'Refresh the API docs to reflect recent endpoint changes and new features.',
+                    tag: 'blue',
+                    priority: 'medium',
+                    assignedUser: 'User 1',
+                    submittedBy: 'User 2',
+                    startDate: '2024-01-25',
+                    dueDate: '2024-02-20',
+                    column: 'todo',
+                    createdAt: '2024-01-25T12:30:00.000Z',
+                    updatedAt: currentTime,
+                    lifecycle: [
+                        {
+                            id: 'lc_11',
+                            timestamp: '2024-01-25T12:30:00.000Z',
+                            fromStatus: null,
+                            toStatus: 'todo',
+                            updateType: 'creation',
+                            comments: 'Documentation is outdated after recent API changes',
+                            updatedBy: 'User 2'
+                        }
+                    ]
+                }
+            ];
+            
+            console.log('Generated fallback tasks:', sampleTasks.length);
+            return sampleTasks;
         }
 
         // Function to save tasks to Confluence (always use tasks.json)
         async function saveTasks(tasks, showNotifications = true) {
             try {
+                // Check if we're using fallback data
+                const isUsingFallback = tasks.some(task => task.id && task.id.startsWith('task_'));
+                
+                if (isUsingFallback) {
+                    // Store data locally when using fallback mode
+                    console.log('Using fallback mode - storing tasks locally');
+                    localStorage.setItem('kanban_fallback_tasks', JSON.stringify({ tasks }));
+                    
+                    if (showNotifications) {
+                        showNotification('Demo Mode', 'Changes saved locally (demo mode - not connected to Confluence)', 'message');
+                    }
+                    return { success: true, mode: 'local' };
+                }
+                
+                // Try to save to Confluence (original functionality)
                 // Get the attachment ID for tasks.json
                 const attachmentsResponse = await fetch(`https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment?filename=tasks.json`);
                 const attachmentsData = await attachmentsResponse.json();
@@ -1072,15 +1340,20 @@
                     throw new Error(`Failed to save tasks.json: ${response.status} ${response.statusText}`);
                 }
                 if (showNotifications) {
-                    showNotification('Success', 'Tasks saved successfully', 'notification');
+                    showNotification('Success', 'Tasks saved successfully to Confluence', 'notification');
                 }
                 return await response.json();
             } catch (error) {
                 console.error('Error saving tasks:', error);
+                
+                // If Confluence save fails, fall back to local storage
+                console.log('Confluence save failed, falling back to local storage');
+                localStorage.setItem('kanban_fallback_tasks', JSON.stringify({ tasks }));
+                
                 if (showNotifications) {
-                    showNotification('Error', 'Error saving tasks. Please try again.', 'error');
+                    showNotification('Demo Mode', 'Changes saved locally (Confluence not accessible)', 'message');
                 }
-                throw error;
+                return { success: true, mode: 'local_fallback' };
             }
         }
 
@@ -1185,6 +1458,9 @@
                     const tasks = await fetchTasks();
                     console.log('fetchTasks returned:', tasks.length, 'tasks');
                     
+                    // Check if we're using fallback data by looking for our dummy task IDs
+                    const isUsingFallback = tasks.some(task => task.id && task.id.startsWith('task_'));
+                    
                     if (tasks.length > 0) {
                         // Saves to their respective columns
                         tasks.forEach(task => {
@@ -1216,7 +1492,18 @@
                         }
                         
                         if (showNotifications === true) {
-                            showNotification('Success', `${tasks.length} tasks loaded successfully`, 'notification');
+                            if (isUsingFallback) {
+                                showNotification('Demo Mode', `${tasks.length} sample tasks loaded for demonstration (Confluence server not accessible)`, 'message');
+                                // Show demo mode banner
+                                showDemoModeBanner();
+                            } else {
+                                showNotification('Success', `${tasks.length} tasks loaded successfully from Confluence`, 'notification');
+                                // Hide demo mode banner if it was shown
+                                hideDemoModeBanner();
+                            }
+                        } else if (isUsingFallback) {
+                            // Even if not showing notifications, show the banner for demo mode
+                            showDemoModeBanner();
                         }
                     } else if (showNotifications) {
                         showNotification('Info', 'No tasks found or unable to load tasks from the server.', 'message');
@@ -1240,9 +1527,9 @@
                     }
 
                 } catch (error) {
-                    console.error('Error loading tasks:', error);
+                    console.error('Error in loadTasksFromConfluence:', error);
                     if (showNotifications) {
-                    showNotification('Error', `Error loading tasks: ${error.message}`, 'error');
+                        showNotification('Error', `Unexpected error loading tasks: ${error.message}`, 'error');
                     }
                     // Reset counters to 0 on error
                     document.querySelectorAll('.task-counter').forEach(counter => {
@@ -3512,6 +3799,35 @@
 
         // Make deleteTask globally accessible
         window.deleteTask = deleteTask;
+
+        // Demo mode banner functions
+        function showDemoModeBanner() {
+            if (shouldShowDemoBanner()) {
+                const banner = document.getElementById('demo-mode-banner');
+                if (banner) {
+                    banner.classList.remove('hidden');
+                }
+            }
+        }
+
+        function hideDemoModeBanner() {
+            const banner = document.getElementById('demo-mode-banner');
+            if (banner) {
+                banner.classList.add('hidden');
+            }
+        }
+
+        // Check if banner should be shown based on user preference
+        function shouldShowDemoBanner() {
+            return sessionStorage.getItem('demo-banner-closed') !== 'true';
+        }
+
+        // Add close banner event listener
+        document.getElementById('close-demo-banner')?.addEventListener('click', function() {
+            hideDemoModeBanner();
+            // Remember user preference to not show banner again this session
+            sessionStorage.setItem('demo-banner-closed', 'true');
+        });
     </script>
 </body>
 </html>
