@@ -809,66 +809,6 @@
         </div>
     </div>
 
-    <!-- Feedback Button -->
-    <button onclick="toggleFeedbackForm()" class="fixed left-4 bottom-4 z-50 flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 !text-md font-medium text-white hover:bg-blue-700">
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
-        </svg>
-        Feedback
-    </button>
-
-    <!-- Feedback Form Modal -->
-    <div id="feedbackModal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="toggleFeedbackForm()"></div>
-        <div class="fixed left-4 bottom-4 w-full max-w-md">
-            <div class="rounded-2xl border border-gray-200 bg-white">
-                <div class="px-5 py-4 sm:px-6 sm:py-5">
-                    <div class="flex items-center justify-between">
-                        <h3 class="!text-2xl font-medium text-gray-800">
-                            Feedback Form
-                        </h3>
-                        <button onclick="toggleFeedbackForm()" class="text-gray-400 hover:text-gray-500">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-5 space-y-6 border-t border-gray-100 sm:p-6">
-                    <form id="feedbackForm" onsubmit="submitFeedback(event)">
-                        <div class="-mx-2.5 flex flex-wrap gap-y-5">
-                            <div class="w-full px-2.5">
-                                <input type="text" id="feedbackName" placeholder="Your Name (Optional)"
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                            </div>
-
-                            <div class="w-full px-2.5">
-                                <select id="feedbackType" required
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Select Feedback Type</option>
-                                    <option value="suggestion">Suggestion</option>
-                                    <option value="bug">Bug Report</option>
-                                    <option value="improvement">Improvement</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-
-                            <div class="w-full px-2.5">
-                                <textarea id="feedbackMessage" placeholder="Your Feedback" required rows="4"
-                                    class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
-                            </div>
-
-                            <div class="w-full px-2.5">
-                                <button type="submit" class="w-full p-3 !text-md font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
-                                    Submit Feedback
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         // Update notification function to handle error type - moved to top for availability
@@ -1062,9 +1002,6 @@
         };
 
         // Function to fetch tasks from Confluence (with fallback to dummy data)
-        let hasShownOfflineNotification = false; // Flag to ensure offline notification is shown only once
-        let usingFallbackData = false; // Flag to indicate if fallback data is being used
-
         async function fetchTasks() {
             try {
                 console.log('Fetching tasks from Confluence...');
@@ -1091,57 +1028,23 @@
                 
                 if (tasks.length > 0) {
                     console.log('Sample task:', tasks[0]);
-                    usingFallbackData = false; // Successfully fetched real data
+                    
                     return tasks;
                 } else {
-                    console.log('No tasks found in response, will use fallback data.');
-                    // If no tasks are returned, treat it as a case for fallback data
-                    throw new Error('No tasks found in Confluence response.');
+                    console.log('No tasks found in Confluence response, returning empty array.');
+                    return []; // Return empty array if no tasks found, signifies successful fetch but no data.
                 }
                 
             } catch (error) {
-                // Log the error and re-throw it to be caught by the caller
-                console.warn('Error fetching tasks from Confluence, attempting to use fallback data:', error);
+                // Log the error and re-throw it to be caught by the caller for network/parsing errors.
+                console.warn('Error fetching tasks from Confluence:', error);
                 console.warn('Error details:', {
                     message: error.message,
                     name: error.name,
                     // stack: error.stack // Stack can be very long, omitting for brevity
                 });
-
-                // Use fallback data
-                usingFallbackData = true;
-                console.log("Using fallback data due to error or no tasks from Confluence.");
-                if (!hasShownOfflineNotification) {
-                    showNotification('Info', 'Failed to load live data. Using sample fallback data.', 'message');
-                    hasShownOfflineNotification = true;
-                }
-                return getFallbackTasks();
+                throw error; // Re-throw the error to be handled by the caller
             }
-        }
-
-        function getFallbackTasks() {
-            console.log("Providing fallback tasks.");
-            const today = new Date();
-            const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-            const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-            const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 7);
-            const lastWeek = new Date(today); lastWeek.setDate(today.getDate() - 7);
-
-            // Helper function to format date locally
-            function formatDate(date) {
-                return date.getFullYear() + '-' + 
-                       String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-                       String(date.getDate()).padStart(2, '0');
-            }
-
-            return [
-                { id: 'task1', title: 'Fallback Task 1: Design Homepage', description: 'Create mockups for the new homepage design.', tag: 'purple', priority: 'high', assignedUser: 'User 1', submittedBy: 'User 3', startDate: formatDate(yesterday), dueDate: formatDate(tomorrow), column: 'todo', createdAt: yesterday.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb1_1', timestamp: yesterday.toISOString(), fromStatus: null, toStatus: 'todo', updateType: 'creation', comments: 'Task created (fallback)', updatedBy: 'User 3'}] },
-                { id: 'task2', title: 'Fallback Task 2: Develop API Endpoint', description: 'Implement the user authentication API endpoint.', tag: 'blue', priority: 'urgent', assignedUser: 'User 2', submittedBy: 'User 1', startDate: formatDate(today), dueDate: formatDate(nextWeek), column: 'progress', createdAt: today.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb2_1', timestamp: today.toISOString(), fromStatus: null, toStatus: 'progress', updateType: 'creation', comments: 'Task created and started (fallback)', updatedBy: 'User 1'}] },
-                { id: 'task3', title: 'Fallback Task 3: Write Blog Post', description: 'Draft a blog post about Q2 updates.', tag: 'green', priority: 'medium', assignedUser: 'User 3', submittedBy: 'User 2', startDate: formatDate(lastWeek), dueDate: formatDate(today), column: 'review', createdAt: lastWeek.toISOString(), updatedAt: yesterday.toISOString(), lifecycle: [{id: 'lc_fb3_1', timestamp: lastWeek.toISOString(), fromStatus: null, toStatus: 'todo', updateType: 'creation', comments: 'Task created (fallback)', updatedBy: 'User 2'}, {id: 'lc_fb3_2', timestamp: yesterday.toISOString(), fromStatus: 'todo', toStatus: 'review', updateType: 'progress', comments: 'Moved to review (fallback)', updatedBy: 'User 3'}] },
-                { id: 'task4', title: 'Fallback Task 4: Fix Login Bug', description: 'Resolve the critical login bug reported yesterday.', tag: 'red', priority: 'urgent', assignedUser: 'User 1', submittedBy: 'User 4', startDate: formatDate(yesterday), dueDate: formatDate(today), column: 'todo', createdAt: yesterday.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb4_1', timestamp: yesterday.toISOString(), fromStatus: null, toStatus: 'todo', updateType: 'creation', comments: 'Urgent bug reported (fallback)', updatedBy: 'User 4'}] },
-                { id: 'task5', title: 'Fallback Task 5: User Testing', description: 'Conduct user testing for the new feature.', tag: 'yellow', priority: 'high', assignedUser: 'User 4', submittedBy: 'User 1', startDate: formatDate(today), dueDate: formatDate(nextWeek), column: 'progress', createdAt: today.toISOString(), updatedAt: today.toISOString(), lifecycle: [{id: 'lc_fb5_1', timestamp: today.toISOString(), fromStatus: null, toStatus: 'progress', updateType: 'creation', comments: 'User testing initiated (fallback)', updatedBy: 'User 1'}] },
-                { id: 'task6', title: 'Fallback Task 6: Deploy to Staging', description: 'Deploy the latest build to the staging environment.', tag: 'blue', priority: 'medium', assignedUser: 'User 2', submittedBy: 'User 5', startDate: formatDate(tomorrow), dueDate: formatDate(nextWeek), column: 'done', createdAt: lastWeek.toISOString(), updatedAt: yesterday.toISOString(), lifecycle: [{id: 'lc_fb6_1', timestamp: lastWeek.toISOString(), fromStatus: null, toStatus: 'progress', updateType: 'creation', comments: 'Task created (fallback)', updatedBy: 'User 5'}, {id: 'lc_fb6_2', timestamp: yesterday.toISOString(), fromStatus: 'progress', toStatus: 'done', updateType: 'completion', comments: 'Deployed to staging (fallback)', updatedBy: 'User 2'}]}
-            ];
         }
 
         // Function to save tasks to Confluence (always use tasks.json)
@@ -2206,79 +2109,6 @@
                 console.debug('Alpine.js not ready for initial metrics update');
             }
         }, 3000); // Increased delay to 3 seconds
-
-        // Feedback form functions
-        function toggleFeedbackForm() {
-            const modal = document.getElementById('feedbackModal');
-            modal.classList.toggle('hidden');
-        }
-
-        async function submitFeedback(event) {
-            event.preventDefault();
-            
-            const feedbackData = {
-                id: `fb_${Date.now()}`,
-                name: document.getElementById('feedbackName').value || 'Anonymous',
-                type: document.getElementById('feedbackType').value,
-                message: document.getElementById('feedbackMessage').value,
-                timestamp: new Date().toISOString()
-            };
-
-            try {
-                // First, get the attachment ID for feedback.json
-                const attachmentsResponse = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment?filename=feedback.json');
-                const attachmentsData = await attachmentsResponse.json();
-                
-                let attachmentId;
-                let existingFeedback = { feedback: [], metadata: { lastUpdated: '', totalFeedback: 0, feedbackTypes: {} } };
-
-                if (attachmentsData.results && attachmentsData.results.length > 0) {
-                    // If feedback.json exists, get its content
-                    attachmentId = attachmentsData.results[0].id;
-                    const feedbackResponse = await fetch(`https://cedt-confluence.net/confluence/download/attachments/2740868871/feedback.json?api=v2`);
-                    if (feedbackResponse.ok) {
-                        existingFeedback = await feedbackResponse.json();
-                    }
-                }
-
-                // Add new feedback
-                existingFeedback.feedback.unshift(feedbackData);
-
-                // Update metadata
-                existingFeedback.metadata = {
-                    lastUpdated: feedbackData.timestamp,
-                    totalFeedback: existingFeedback.feedback.length,
-                    feedbackTypes: existingFeedback.feedback.reduce((acc, fb) => {
-                        acc[fb.type] = (acc[fb.type] || 0) + 1;
-                        return acc;
-                    }, {})
-                };
-
-                // Create or update the attachment
-                const formData = new FormData();
-                const blob = new Blob([JSON.stringify(existingFeedback, null, 2)], { type: 'application/json' });
-                formData.append('file', blob, 'feedback.json');
-
-                const response = await fetch(`https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment${attachmentId ? `/${attachmentId}` : ''}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-Atlassian-Token': 'no-check'
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to save feedback: ${response.status} ${response.statusText}`);
-                }
-
-                showNotification('Success', 'Thank you for your feedback!', 'success');
-                document.getElementById('feedbackForm').reset();
-                toggleFeedbackForm();
-            } catch (error) {
-                console.error('Error submitting feedback:', error);
-                showNotification('Error', 'Failed to submit feedback. Please try again.', 'error');
-            }
-        }
 
         // Helper function to create task card HTML
         function createTaskCardHTML(task) {
@@ -3452,7 +3282,7 @@
                 String(date.getMonth() + 1).padStart(2, '0') + '-' + 
                 String(date.getDate()).padStart(2, '0');
             const dayTasks = tasks.filter(task => {
-                return task.dueDate === dateString || task.startDate === dateString;
+                return task.dueDate === dateString;
             });
 
             // Tasks container
@@ -3554,7 +3384,7 @@
                 String(date.getMonth() + 1).padStart(2, '0') + '-' + 
                 String(date.getDate()).padStart(2, '0');
             const dayTasks = tasks.filter(task => {
-                return task.dueDate === dateString || task.startDate === dateString;
+                return task.dueDate === dateString;
             });
 
             // Tasks container
