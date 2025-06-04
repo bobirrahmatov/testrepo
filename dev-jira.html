@@ -132,47 +132,7 @@
 </head>
 
 <body class="bg-gray-100">
-    <!-- Message Component -->
-    <div class="fixed bottom-4 right-4 z-50" id="notificationsContainer">
-        <div class="flex flex-col gap-4">
-            <!-- Notifications will be dynamically added here -->
-        </div>
-    </div>
-
     <div class="p-4">
-        <!-- Demo Mode Banner (hidden by default) -->
-        <div id="demo-mode-banner" class="mb-4 hidden">
-            <div class="rounded-lg bg-blue-50 border border-blue-200 p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <h3 class="!text-md font-medium text-blue-800">Demo Mode Active</h3>
-                        <div class="mt-1 !text-md text-blue-700">
-                            <p>You're viewing sample data because the Confluence server is not accessible. All changes
-                                will be saved locally in your browser.</p>
-                        </div>
-                    </div>
-                    <div class="ml-4 flex-shrink-0">
-                        <button type="button" id="close-demo-banner"
-                            class="inline-flex text-blue-400 hover:text-blue-600 focus:outline-none">
-                            <span class="sr-only">Close</span>
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                    clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="rounded-2xl border border-gray-200 bg-white">
             <div class="px-5 py-4 sm:px-6 sm:py-5">
                 <h3 class="!text-2xl font-medium text-gray-800">
@@ -800,11 +760,7 @@
                                 <select id="task-assigned-user"
                                     class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                                     <option value="">Task assigned to:</option>
-                                    <option value="User 1">User 1</option>
-                                    <option value="User 2">User 2</option>
-                                    <option value="User 3">User 3</option>
-                                    <option value="User 4">User 4</option>
-                                    <option value="User 5">User 5</option>
+                                    <!-- Options will be populated by JavaScript -->
                                 </select>
                             </div>
 
@@ -812,11 +768,7 @@
                                 <select id="task-submitted-by"
                                     class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                                     <option value="">Task submitted by:</option>
-                                    <option value="User 1">User 1</option>
-                                    <option value="User 2">User 2</option>
-                                    <option value="User 3">User 3</option>
-                                    <option value="User 4">User 4</option>
-                                    <option value="User 5">User 5</option>
+                                    <!-- Options will be populated by JavaScript -->
                                 </select>
                             </div>
 
@@ -907,11 +859,7 @@
                                 <select id="lifecycle-updated-by" required
                                     class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
                                     <option value="">Select assigned user</option>
-                                    <option value="User 1">User 1</option>
-                                    <option value="User 2">User 2</option>
-                                    <option value="User 3">User 3</option>
-                                    <option value="User 4">User 4</option>
-                                    <option value="User 5">User 5</option>
+                                    <!-- Options will be populated by JavaScript -->
                                 </select>
                             </div>
 
@@ -974,7 +922,16 @@
     <script>
         // Update notification function to handle error type - moved to top for availability
         function showNotification(title, message, type = 'notification') {
-            const container = document.getElementById('notificationsContainer');
+            let container = document.getElementById('notificationsContainer');
+            
+            // If container doesn't exist, create it
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'notificationsContainer';
+                container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-md';
+                document.body.appendChild(container);
+            }
+            
             const notification = document.createElement('div');
 
             const bgColor = type === 'error'
@@ -1221,6 +1178,263 @@
             }
         }
 
+        // Function to fetch team members from Excel file
+        async function fetchTeamMembers() {
+            try {
+                console.log('Fetching team members from Confluence...');
+                const url = `https://cedt-confluence.net/confluence/download/attachments/2740868871/team_members.xlsx?api=v2`;
+                console.log('Team members URL:', url);
+
+                const response = await fetch(url);
+                console.log('Team members response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load team members: ${response.status} ${response.statusText}`);
+                }
+
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                console.log('Team members data:', jsonData);
+
+                // Transform data to ensure consistent structure
+                const teamMembers = jsonData.map(member => ({
+                    name: member.name || member.Name || '',
+                    surname: member.surname || member.Surname || '',
+                    username: member.username || member.Username || member.id || member.ID || '',
+                    maker: member.maker === true || member.maker === 'True' || member.maker === 'true' || member.Maker === true || member.Maker === 'True' || member.Maker === 'true',
+                    checker: member.checker === true || member.checker === 'True' || member.checker === 'true' || member.Checker === true || member.Checker === 'True' || member.Checker === 'true',
+                    admin: member.admin === true || member.admin === 'True' || member.admin === 'true' || member.Admin === true || member.Admin === 'True' || member.Admin === 'true'
+                }));
+
+                console.log('Processed team members:', teamMembers);
+                return teamMembers;
+
+            } catch (error) {
+                console.warn('Error fetching team members:', error);
+                console.warn('Falling back to demo team members...');
+
+                // Fallback demo data
+                const demoTeamMembers = [
+                    { name: 'John', surname: 'Doe', username: 'john.doe', maker: true, checker: false, admin: true },
+                    { name: 'Jane', surname: 'Smith', username: 'jane.smith', maker: true, checker: true, admin: false },
+                    { name: 'Bob', surname: 'Wilson', username: 'bob.wilson', maker: false, checker: true, admin: false },
+                    { name: 'Alice', surname: 'Johnson', username: 'alice.johnson', maker: true, checker: false, admin: false },
+                    { name: 'Charlie', surname: 'Brown', username: 'charlie.brown', maker: false, checker: true, admin: false },
+                    { name: 'Admin', surname: 'User', username: 'admin', maker: true, checker: true, admin: true }
+                ];
+
+                return demoTeamMembers;
+            }
+        }
+
+        // Function to get current user from Confluence API
+        async function getCurrentUser() {
+            try {
+                console.log('Fetching current user from Confluence...');
+                const response = await fetch('https://cedt-confluence.net/confluence/rest/api/user/current', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to get current user: ${response.status} ${response.statusText}`);
+                }
+
+                const userData = await response.json();
+                console.log('Current user data:', userData);
+
+                return {
+                    username: userData.username || userData.accountId || 'unknown',
+                    displayName: userData.displayName || userData.username || 'Unknown User'
+                };
+
+            } catch (error) {
+                console.warn('Error fetching current user:', error);
+                console.warn('Falling back to demo user...');
+
+                // In demo mode, simulate being logged in as admin
+                return {
+                    username: 'admin',
+                    displayName: 'Demo Admin User'
+                };
+            }
+        }
+
+        // Global variables for user management
+        let teamMembers = [];
+        let currentUser = null;
+        let userPermissions = {
+            canDelete: false,
+            isAdmin: false,
+            isMaker: false,
+            isChecker: false
+        };
+
+        // Function to initialize user management
+        async function initializeUserManagement() {
+            try {
+                console.log('Initializing user management...');
+                
+                // Fetch team members and current user in parallel
+                const [members, user] = await Promise.all([
+                    fetchTeamMembers(),
+                    getCurrentUser()
+                ]);
+
+                teamMembers = members;
+                currentUser = user;
+
+                console.log('Team members loaded:', teamMembers.length);
+                console.log('Current user:', currentUser);
+
+                // Find current user in team members to get permissions
+                const userProfile = teamMembers.find(member => member.username === currentUser.username);
+                
+                if (userProfile) {
+                    userPermissions = {
+                        canDelete: userProfile.admin,
+                        isAdmin: userProfile.admin,
+                        isMaker: userProfile.maker,
+                        isChecker: userProfile.checker
+                    };
+                    console.log('User permissions:', userPermissions);
+                } else {
+                    console.warn('Current user not found in team members list');
+                    userPermissions = {
+                        canDelete: false,
+                        isAdmin: false,
+                        isMaker: false,
+                        isChecker: false
+                    };
+                }
+
+                // Update UI based on permissions
+                updateUIBasedOnPermissions();
+                
+                // Populate form dropdowns
+                populateUserDropdowns();
+
+                showNotification('User Management', `Logged in as ${currentUser.displayName} (${userPermissions.isAdmin ? 'Admin' : 'User'})`, 'message');
+
+            } catch (error) {
+                console.error('Error initializing user management:', error);
+                showNotification('Error', 'Failed to initialize user management', 'error');
+            }
+        }
+
+        // Function to update UI based on user permissions
+        function updateUIBasedOnPermissions() {
+            console.log('Updating UI based on permissions:', userPermissions);
+            
+            // Hide/show delete buttons based on admin permissions
+            const deleteButtons = document.querySelectorAll('[onclick*="deleteTask"]');
+            deleteButtons.forEach(button => {
+                if (userPermissions.canDelete) {
+                    button.style.display = '';
+                    button.disabled = false;
+                } else {
+                    button.style.display = 'none';
+                }
+            });
+
+            // Add permission indicator to the header
+            addPermissionIndicator();
+        }
+
+        // Function to add permission indicator to header
+        function addPermissionIndicator() {
+            const headerElement = document.querySelector('h3.!text-2xl');
+            if (headerElement && currentUser) {
+                // Remove existing indicator
+                const existingIndicator = document.getElementById('user-permission-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+
+                const indicator = document.createElement('div');
+                indicator.id = 'user-permission-indicator';
+                indicator.className = 'mt-2 flex items-center gap-2 text-sm text-gray-600';
+                
+                const roleIcon = userPermissions.isAdmin ? '👑' : userPermissions.isMaker && userPermissions.isChecker ? '🛠️✅' : userPermissions.isMaker ? '🛠️' : userPermissions.isChecker ? '✅' : '👤';
+                const roleText = userPermissions.isAdmin ? 'Admin' : userPermissions.isMaker && userPermissions.isChecker ? 'Maker & Checker' : userPermissions.isMaker ? 'Maker' : userPermissions.isChecker ? 'Checker' : 'User';
+                
+                indicator.innerHTML = `
+                    <span class="flex items-center gap-1">
+                        <span>${roleIcon}</span>
+                        <span>Logged in as: <strong>${currentUser.displayName}</strong> (${roleText})</span>
+                    </span>
+                `;
+                
+                headerElement.parentNode.insertBefore(indicator, headerElement.nextSibling);
+            }
+        }
+
+        // Function to populate user dropdowns based on roles
+        function populateUserDropdowns() {
+            console.log('Populating user dropdowns...');
+            
+            // Get makers for task-assigned-user
+            const makers = teamMembers.filter(member => member.maker);
+            console.log('Makers found:', makers.length);
+            
+            // Get checkers for task-submitted-by
+            const checkers = teamMembers.filter(member => member.checker);
+            console.log('Checkers found:', checkers.length);
+
+            // Populate assigned user dropdown (makers)
+            const assignedUserSelect = document.getElementById('task-assigned-user');
+            if (assignedUserSelect) {
+                assignedUserSelect.innerHTML = '<option value="">Task assigned to:</option>';
+                makers.forEach(maker => {
+                    const option = document.createElement('option');
+                    option.value = `${maker.name} ${maker.surname}`;
+                    option.textContent = `${maker.name} ${maker.surname} (${maker.username})`;
+                    assignedUserSelect.appendChild(option);
+                });
+                console.log('Assigned user dropdown populated with', makers.length, 'makers');
+            }
+
+            // Populate submitted by dropdown (checkers)
+            const submittedBySelect = document.getElementById('task-submitted-by');
+            if (submittedBySelect) {
+                submittedBySelect.innerHTML = '<option value="">Task submitted by:</option>';
+                checkers.forEach(checker => {
+                    const option = document.createElement('option');
+                    option.value = `${checker.name} ${checker.surname}`;
+                    option.textContent = `${checker.name} ${checker.surname} (${checker.username})`;
+                    submittedBySelect.appendChild(option);
+                });
+                console.log('Submitted by dropdown populated with', checkers.length, 'checkers');
+            }
+
+            // Also update lifecycle form dropdown
+            const lifecycleUpdatedBySelect = document.getElementById('lifecycle-updated-by');
+            if (lifecycleUpdatedBySelect) {
+                lifecycleUpdatedBySelect.innerHTML = '<option value="">Select assigned user</option>';
+                makers.forEach(maker => {
+                    const option = document.createElement('option');
+                    option.value = `${maker.name} ${maker.surname}`;
+                    option.textContent = `${maker.name} ${maker.surname} (${maker.username})`;
+                    lifecycleUpdatedBySelect.appendChild(option);
+                });
+            }
+        }
+
+        // Function to check if user can delete (with enhanced permission checking)
+        function canUserDelete() {
+            if (!currentUser || !userPermissions.canDelete) {
+                console.log('Delete permission denied:', { currentUser, canDelete: userPermissions.canDelete });
+                return false;
+            }
+            return true;
+        }
+
         // Function to save tasks to Confluence (always use tasks.json)
         async function saveTasks(tasks, showNotifications = true) {
             try {
@@ -1294,6 +1508,9 @@
 
             // Initialize with kanban view
             window.switchView('kanban');
+
+            // Initialize user management first
+            await initializeUserManagement();
 
             // Load initial tasks
             await loadTasksFromConfluence(false); // Pass false to prevent initial notifications
@@ -1410,6 +1627,11 @@
                         // Reapply search filter if one is active
                         if (typeof applySearchFilter === 'function') {
                             applySearchFilter();
+                        }
+
+                        // Update UI permissions after tasks are loaded
+                        if (typeof updateUIBasedOnPermissions === 'function') {
+                            updateUIBasedOnPermissions();
                         }
 
                         if (showNotifications === true) {
@@ -2432,7 +2654,6 @@
                     return priorityColors[priority] || 'bg-gray-100 text-gray-700';
                 };
 
-                // Get user display name
                 return `
                 <div class="group bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer" 
                      style="min-height: 200px;" 
@@ -2465,11 +2686,13 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </button>
+                            ${userPermissions && userPermissions.canDelete ? `
                             <button onclick="event.stopPropagation(); deleteTask('${task.id}')" class="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
                             </button>
+                            ` : ''}
                         </div>
                     </div>
                     
@@ -2633,7 +2856,7 @@
                         <td class="px-6 py-4 whitespace-nowrap !text-md font-medium">
                             <button onclick="editTask('${task.id}')" class="text-indigo-600 hover:text-indigo-900 mr-2">Edit</button>
                             <button onclick="viewLifecycleHistory('${task.id}')" class="text-blue-600 hover:text-blue-900 mr-2">History</button>
-                            <button onclick="deleteTask('${task.id}')" class="text-red-600 hover:text-red-900">Delete</button>
+                            ${userPermissions && userPermissions.canDelete ? `<button onclick="deleteTask('${task.id}')" class="text-red-600 hover:text-red-900">Delete</button>` : ''}
                         </td>
                     `;
                         tableBody.appendChild(row);
@@ -2752,6 +2975,12 @@
             // Delete task function
             async function deleteTask(taskId) {
                 console.log('deleteTask called for:', taskId);
+
+                // Check if user has permission to delete
+                if (!canUserDelete()) {
+                    showNotification('Permission Denied', 'Only admin users can delete tasks', 'error');
+                    return;
+                }
 
                 // Hide menu first
                 const menuElement = document.getElementById(`menu-${taskId}`);
@@ -3663,13 +3892,12 @@
         // Make deleteTask globally accessible
         window.deleteTask = deleteTask;
 
-        // Add close banner event listener
-        document.getElementById('close-demo-banner')?.addEventListener('click', function () {
-            hideDemoModeBanner();
-            // Remember user preference to not show banner again this session
-            sessionStorage.setItem('demo-banner-closed', 'true');
-        });
     </script>
+
+    <!-- Notifications Container -->
+    <div id="notificationsContainer" class="fixed bottom-4 right-4 z-50 space-y-2 max-w-md">
+        <!-- Notifications will be added here -->
+    </div>
 </body>
 
 </html>
