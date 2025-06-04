@@ -799,14 +799,24 @@
                             <div class="w-1/2 px-2.5">
                                 <select id="task-assigned-user"
                                     class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Assign to (Maker):</option>
+                                    <option value="">Task assigned to:</option>
+                                    <option value="User 1">User 1</option>
+                                    <option value="User 2">User 2</option>
+                                    <option value="User 3">User 3</option>
+                                    <option value="User 4">User 4</option>
+                                    <option value="User 5">User 5</option>
                                 </select>
                             </div>
 
                             <div class="w-1/2 px-2.5">
                                 <select id="task-submitted-by"
                                     class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Submitted by (Checker):</option>
+                                    <option value="">Task submitted by:</option>
+                                    <option value="User 1">User 1</option>
+                                    <option value="User 2">User 2</option>
+                                    <option value="User 3">User 3</option>
+                                    <option value="User 4">User 4</option>
+                                    <option value="User 5">User 5</option>
                                 </select>
                             </div>
 
@@ -896,7 +906,12 @@
                             <div class="w-full px-2.5">
                                 <select id="lifecycle-updated-by" required
                                     class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Updated by:</option>
+                                    <option value="">Select assigned user</option>
+                                    <option value="User 1">User 1</option>
+                                    <option value="User 2">User 2</option>
+                                    <option value="User 3">User 3</option>
+                                    <option value="User 4">User 4</option>
+                                    <option value="User 5">User 5</option>
                                 </select>
                             </div>
 
@@ -1280,33 +1295,6 @@
             // Initialize with kanban view
             window.switchView('kanban');
 
-            // Load team members first
-            try {
-                console.log('Loading team members...');
-                teamMembers = await fetchTeamMembers();
-                console.log('Team members loaded:', teamMembers.length, 'members');
-                
-                // Populate dropdowns with team members
-                populateUserDropdowns();
-                
-                // Restore user selection from session storage
-                const savedUser = sessionStorage.getItem('current-user');
-                if (savedUser && teamMembers.find(member => member.fullName === savedUser)) {
-                    setCurrentUser(savedUser);
-                    console.log('Restored user from session:', savedUser);
-                }
-                
-                // Show user selection modal for demo (only if not skipped before and no saved user)
-                if (!sessionStorage.getItem('user-selected') && !savedUser && teamMembers.length > 0) {
-                    setTimeout(() => showUserSelectionModal(), 1000);
-                }
-                
-                showNotification('Team Members Loaded', `${teamMembers.length} team members loaded successfully`, 'success');
-            } catch (error) {
-                console.error('Error loading team members:', error);
-                showNotification('Warning', 'Could not load team members. Using default user list.', 'error');
-            }
-
             // Load initial tasks
             await loadTasksFromConfluence(false); // Pass false to prevent initial notifications
 
@@ -1318,9 +1306,6 @@
             document.getElementById('calendar-next-btn').addEventListener('click', function () {
                 navigateCalendar(1);
             });
-
-            // Add user selection button to header
-            addUserSelectionButton();
 
             // Function to navigate calendar
             function navigateCalendar(direction) {
@@ -2447,6 +2432,7 @@
                     return priorityColors[priority] || 'bg-gray-100 text-gray-700';
                 };
 
+                // Get user display name
                 return `
                 <div class="group bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer" 
                      style="min-height: 200px;" 
@@ -2767,12 +2753,6 @@
             async function deleteTask(taskId) {
                 console.log('deleteTask called for:', taskId);
 
-                // Check admin access before proceeding
-                if (!hasAdminAccess()) {
-                    showNotification('Access Denied', 'Only administrators can delete tasks', 'error');
-                    return;
-                }
-
                 // Hide menu first
                 const menuElement = document.getElementById(`menu-${taskId}`);
                 if (menuElement) {
@@ -2817,55 +2797,6 @@
 
                         showNotification('Error', 'Error deleting task. Please try again.', 'error');
                     }
-                }
-            }
-
-            // Function to add user selection button to header
-            function addUserSelectionButton() {
-                const header = document.querySelector('.px-5.py-4.sm\\:px-6.sm\\:py-5');
-                if (header) {
-                    const buttonContainer = document.createElement('div');
-                    buttonContainer.className = 'mt-2 flex items-center gap-2';
-                    
-                    const userButton = document.createElement('button');
-                    userButton.id = 'user-selection-btn';
-                    userButton.className = 'flex items-center gap-2 rounded-lg bg-gray-500 px-3 py-2 text-sm font-medium text-white hover:bg-gray-600';
-                    userButton.innerHTML = `
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        Select User
-                    `;
-                    userButton.onclick = showUserSelectionModal;
-                    
-                    buttonContainer.appendChild(userButton);
-                    header.appendChild(buttonContainer);
-                    
-                    // Update button text when user is selected
-                    updateUserSelectionButton();
-                }
-            }
-
-            // Function to update user selection button text
-            function updateUserSelectionButton() {
-                const userButton = document.getElementById('user-selection-btn');
-                if (userButton && currentUser) {
-                    const user = teamMembers.find(member => member.fullName === currentUser);
-                    const roles = [];
-                    if (user) {
-                        if (user.maker) roles.push('Maker');
-                        if (user.checker) roles.push('Checker'); 
-                        if (user.admin) roles.push('Admin');
-                    }
-                    userButton.innerHTML = `
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        ${currentUser} ${roles.length > 0 ? `(${roles.join(', ')})` : ''}
-                    `;
-                    userButton.className = user && user.admin 
-                        ? 'flex items-center gap-2 rounded-lg bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600'
-                        : 'flex items-center gap-2 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-600';
                 }
             }
 
@@ -3738,257 +3669,6 @@
             // Remember user preference to not show banner again this session
             sessionStorage.setItem('demo-banner-closed', 'true');
         });
-
-        // Function to fetch team members from Confluence Excel file
-        async function fetchTeamMembers() {
-            try {
-                console.log('Fetching team members from Confluence...');
-                const url = `https://cedt-confluence.net/confluence/download/attachments/2740868871/team_members.xlsx?api=v2`;
-                console.log('Team members URL:', url);
-
-                const response = await fetch(url);
-                console.log('Team members response status:', response.status);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load team members: ${response.status} ${response.statusText}`);
-                }
-
-                const arrayBuffer = await response.arrayBuffer();
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const data = XLSX.utils.sheet_to_json(worksheet);
-
-                console.log('Team members data:', data);
-
-                // Transform data to expected format
-                const teamMembers = data.map(row => ({
-                    name: row.name || '',
-                    surname: row.surname || '',
-                    fullName: `${row.name || ''} ${row.surname || ''}`.trim(),
-                    maker: row.maker === true || row.maker === 'TRUE' || row.maker === 'True',
-                    checker: row.checker === true || row.checker === 'TRUE' || row.checker === 'True',
-                    admin: row.admin === true || row.admin === 'TRUE' || row.admin === 'True'
-                }));
-
-                console.log('Processed team members:', teamMembers);
-                return teamMembers;
-
-            } catch (error) {
-                console.warn('Error fetching team members from Confluence:', error);
-                console.warn('Falling back to sample team members...');
-
-                // Fallback sample data
-                return [
-                    { name: 'John', surname: 'Doe', fullName: 'John Doe', maker: true, checker: false, admin: true },
-                    { name: 'Jane', surname: 'Smith', fullName: 'Jane Smith', maker: false, checker: true, admin: false },
-                    { name: 'Bob', surname: 'Johnson', fullName: 'Bob Johnson', maker: true, checker: true, admin: false },
-                    { name: 'Alice', surname: 'Brown', fullName: 'Alice Brown', maker: true, checker: false, admin: false },
-                    { name: 'Charlie', surname: 'Wilson', fullName: 'Charlie Wilson', maker: false, checker: true, admin: true }
-                ];
-            }
-        }
-
-        // Store team members globally
-        let teamMembers = [];
-        let currentUser = null; // Will be set based on some authentication or selection
-
-        // Function to populate user dropdowns based on roles
-        function populateUserDropdowns() {
-            console.log('Populating user dropdowns with team members:', teamMembers);
-
-            // Get all user dropdowns
-            const assignedUserSelect = document.getElementById('task-assigned-user');
-            const submittedBySelect = document.getElementById('task-submitted-by');
-            const lifecycleUpdatedBySelect = document.getElementById('lifecycle-updated-by');
-
-            // Clear existing options (keep placeholder)
-            [assignedUserSelect, submittedBySelect, lifecycleUpdatedBySelect].forEach(select => {
-                if (select) {
-                    // Keep the first option (placeholder) and remove the rest
-                    while (select.children.length > 1) {
-                        select.removeChild(select.lastChild);
-                    }
-                }
-            });
-
-            // Populate task-assigned-user with makers
-            if (assignedUserSelect) {
-                assignedUserSelect.options[0].textContent = 'Assign to (Maker):';
-                const makers = teamMembers.filter(member => member.maker);
-                makers.forEach(member => {
-                    const option = document.createElement('option');
-                    option.value = member.fullName;
-                    option.textContent = member.fullName;
-                    assignedUserSelect.appendChild(option);
-                });
-                console.log('Populated makers:', makers.length);
-            }
-
-            // Populate task-submitted-by with checkers
-            if (submittedBySelect) {
-                submittedBySelect.options[0].textContent = 'Submitted by (Checker):';
-                const checkers = teamMembers.filter(member => member.checker);
-                checkers.forEach(member => {
-                    const option = document.createElement('option');
-                    option.value = member.fullName;
-                    option.textContent = member.fullName;
-                    submittedBySelect.appendChild(option);
-                });
-                console.log('Populated checkers:', checkers.length);
-            }
-
-            // Populate lifecycle-updated-by with all users
-            if (lifecycleUpdatedBySelect) {
-                lifecycleUpdatedBySelect.options[0].textContent = 'Updated by:';
-                teamMembers.forEach(member => {
-                    const option = document.createElement('option');
-                    option.value = member.fullName;
-                    option.textContent = member.fullName;
-                    lifecycleUpdatedBySelect.appendChild(option);
-                });
-                console.log('Populated all users for lifecycle:', teamMembers.length);
-            }
-        }
-
-        // Function to check if current user has admin access
-        function hasAdminAccess() {
-            if (!currentUser) {
-                // For demo purposes, if no user is set, assume admin access
-                console.log('No current user set, assuming admin access for demo');
-                return true;
-            }
-            const user = teamMembers.find(member => member.fullName === currentUser);
-            return user ? user.admin : false;
-        }
-
-        // Function to set current user (could be called from login or user selection)
-        function setCurrentUser(userFullName) {
-            currentUser = userFullName;
-            console.log('Current user set to:', currentUser);
-            
-            // Update UI based on admin access
-            updateUIBasedOnAccess();
-            
-            // Update user selection button if it exists
-            if (document.getElementById('user-selection-btn')) {
-                updateUserSelectionButton();
-            }
-        }
-
-        // Function to update UI elements based on user access
-        function updateUIBasedOnAccess() {
-            const isAdmin = hasAdminAccess();
-            console.log('User has admin access:', isAdmin);
-
-            // Show/hide delete buttons based on admin access
-            const deleteButtons = document.querySelectorAll('[onclick*="deleteTask"]');
-            deleteButtons.forEach(button => {
-                if (isAdmin) {
-                    button.style.display = '';
-                    button.disabled = false;
-                } else {
-                    button.style.display = 'none';
-                    button.disabled = true;
-                }
-            });
-
-            // Add admin indicator to UI if user is admin
-            updateAdminIndicator(isAdmin);
-        }
-
-        // Function to add admin indicator to UI
-        function updateAdminIndicator(isAdmin) {
-            // Remove existing indicator
-            const existingIndicator = document.getElementById('admin-indicator');
-            if (existingIndicator) {
-                existingIndicator.remove();
-            }
-
-            if (isAdmin && currentUser) {
-                const header = document.querySelector('h3');
-                if (header) {
-                    const indicator = document.createElement('span');
-                    indicator.id = 'admin-indicator';
-                    indicator.className = 'ml-3 px-2 py-1 text-sm font-medium bg-red-100 text-red-800 rounded-full';
-                    indicator.textContent = `Admin: ${currentUser}`;
-                    header.appendChild(indicator);
-                }
-            }
-        }
-
-        // Enhanced delete task function with admin check
-        async function deleteTaskWithPermission(taskId) {
-            console.log('deleteTaskWithPermission called for:', taskId);
-
-            // Check admin access
-            if (!hasAdminAccess()) {
-                showNotification('Access Denied', 'Only administrators can delete tasks', 'error');
-                return;
-            }
-
-            // Proceed with original delete logic
-            await deleteTask(taskId);
-        }
-
-        // User selection modal for demo purposes
-        function showUserSelectionModal() {
-            const modal = document.createElement('div');
-            modal.id = 'user-selection-modal';
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            
-            modal.innerHTML = `
-                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Select Your User Profile</h3>
-                    <div class="space-y-2 max-h-60 overflow-y-auto">
-                        ${teamMembers.map(member => `
-                            <button onclick="selectUser('${member.fullName}')" 
-                                    class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                                <div class="font-medium">${member.fullName}</div>
-                                <div class="text-sm text-gray-500">
-                                    ${member.maker ? 'Maker' : ''} 
-                                    ${member.checker ? 'Checker' : ''} 
-                                    ${member.admin ? 'Admin' : ''}
-                                </div>
-                            </button>
-                        `).join('')}
-                    </div>
-                    <div class="mt-4 flex justify-end space-x-2">
-                        <button onclick="closeUserSelectionModal()" 
-                                class="px-4 py-2 text-gray-600 hover:text-gray-800">Skip</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-
-        // Function to select user and close modal
-        function selectUser(userFullName) {
-            setCurrentUser(userFullName);
-            closeUserSelectionModal();
-            
-            // Remember user selection for this session
-            sessionStorage.setItem('user-selected', 'true');
-            sessionStorage.setItem('current-user', userFullName);
-            
-            // Update user selection button
-            updateUserSelectionButton();
-            
-            showNotification('User Selected', `Logged in as ${userFullName}`, 'success');
-        }
-
-        // Function to close user selection modal
-        function closeUserSelectionModal() {
-            const modal = document.getElementById('user-selection-modal');
-            if (modal) {
-                modal.remove();
-            }
-        }
-
-        // Make functions globally accessible
-        window.selectUser = selectUser;
-        window.closeUserSelectionModal = closeUserSelectionModal;
-        window.setCurrentUser = setCurrentUser;
     </script>
 </body>
 
