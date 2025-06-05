@@ -135,7 +135,7 @@
     <div class="p-4">
         <div class="rounded-2xl border border-gray-200 bg-white">
             <div class="px-5 py-4 sm:px-6 sm:py-5">
-                <h3 class="!text-2xl font-medium text-gray-800">
+                <h3 class="!!text-2xl font-medium text-gray-800">
                     Task Management
                 </h3>
             </div>
@@ -729,123 +729,126 @@
     </div>
 
     <!-- Task Form Modal -->
-    <div id="task-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div id="task-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center hidden">
         <div
             class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
             <div class="rounded-2xl border border-gray-200 bg-white">
-                <div class="px-5 py-4 sm:px-6 sm:py-5">
-                    <div class="flex items-center justify-between">
-                        <h3 class="!text-2xl font-medium text-gray-800">Add New Task</h3>
-                        <button id="close-modal" class="text-gray-400 hover:text-gray-500">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
+                <div class="px-5 py-4 sm:px-6 sm:py-5" <div class="flex items-center justify-between">
+                    <h3 class="!!text-2xl font-medium text-gray-800">Add New Task</h3>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-500">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
-                <div class="p-5 space-y-6 border-t border-gray-100 sm:p-6">
-                    <form id="task-form">
-                        <input type="hidden" id="form-column" value="">
-                        <input type="hidden" id="task-id" value="">
-                        <div class="-mx-2.5 flex flex-wrap gap-y-5">
-                            <div class="w-full px-2.5">
-                                <input type="text" id="task-ticket-number" placeholder="Ticket Number (e.g., PBTBLT-122670)" required
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                            </div>
+            </div>
+            <div class="p-5 space-y-6 border-t border-gray-100 sm:p-6">
+                <form id="task-form">
+                    <input type="hidden" id="form-column" value="">
+                    <input type="hidden" id="task-id" value="">
+                    <div class="-mx-2.5 flex flex-wrap gap-y-5">
+                        <div class="w-full px-2.5">
+                            <input type="text" id="task-ticket-number" placeholder="Ticket Number (e.g., PBTBLT-122670)"
+                                required
+                                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                        </div>
 
-                            <div class="w-full px-2.5">
-                                <textarea id="task-description" placeholder="Issue Description" rows="3" required
-                                    class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
-                            </div>
+                        <div class="w-full px-2.5">
+                            <textarea id="task-description" placeholder="Issue Description" rows="3" required
+                                class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                        </div>
 
-                            <div class="w-1/2 px-2.5">
-                                <select id="task-ticket-type" required
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Select Ticket Type</option>
-                                    <option value="jira">Jira</option>
-                                    <option value="enhancement">Enhancement</option>
-                                    <option value="bug">Bug</option>
-                                    <option value="maintenance">Maintenance</option>
-                                    <option value="support">Support</option>
-                                </select>
-                            </div>
+                        <div class="w-1/2 px-2.5">
+                            <select id="task-ticket-type" required
+                                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                <option value="">Select Ticket Type</option>
+                                <option value="jira">Jira</option>
+                                <option value="enhancement">Enhancement</option>
+                                <option value="bug">Bug</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="support">Support</option>
+                            </select>
+                        </div>
 
-                            <div class="w-1/2 px-2.5">
-                                <select id="task-priority" required
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Select Priority</option>
-                                    <option value="1">1 - Critical</option>
-                                    <option value="2">2 - High</option>
-                                    <option value="3">3 - Medium</option>
-                                    <option value="4">4 - Low</option>
-                                    <option value="5">5 - Lowest</option>
-                                </select>
-                            </div>
+                        <div class="w-1/2 px-2.5">
+                            <select id="task-priority" required
+                                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                <option value="">Select Priority</option>
+                                <option value="1">1 - Critical</option>
+                                <option value="2">2 - High</option>
+                                <option value="3">3 - Medium</option>
+                                <option value="4">4 - Low</option>
+                                <option value="5">5 - Lowest</option>
+                            </select>
+                        </div>
 
-                            <div class="w-1/2 px-2.5">
-                                <select id="task-assigned-to"
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Assigned to (Maker):</option>
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
-                            </div>
+                        <div class="w-1/2 px-2.5">
+                            <select id="task-assigned-to"
+                                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                <option value="">Assigned to (Maker):</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
 
-                            <div class="w-1/2 px-2.5">
-                                <select id="task-assigned-by"
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Assigned by:</option>
-                                    <!-- Options will be populated by JavaScript -->
-                                </select>
-                            </div>
+                        <div class="w-1/2 px-2.5">
+                            <select id="task-assigned-by"
+                                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                <option value="">Assigned by:</option>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
 
-                            <div class="w-1/2 px-2.5">
-                                <select id="task-team-in-charge" required
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                                    <option value="">Select Team in Charge</option>
-                                    <option value="tableau">Tableau</option>
-                                    <option value="automation">Automation</option>
-                                    <option value="data">Data</option>
-                                    <option value="infrastructure">Infrastructure</option>
-                                    <option value="security">Security</option>
-                                    <option value="development">Development</option>
-                                </select>
-                            </div>
+                        <div class="w-1/2 px-2.5">
+                            <select id="task-team-in-charge" required
+                                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                <option value="">Select Team in Charge</option>
+                                <option value="tableau">Tableau</option>
+                                <option value="automation">Automation</option>
+                                <option value="data">Data</option>
+                                <option value="infrastructure">Infrastructure</option>
+                                <option value="security">Security</option>
+                                <option value="development">Development</option>
+                            </select>
+                        </div>
 
-                            <div class="w-1/2 px-2.5">
-                                <input type="date" id="task-submission-date" placeholder="Submission Date"
-                                    class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
-                            </div>
+                        <div class="w-1/2 px-2.5">
+                            <input type="date" id="task-submission-date" placeholder="Submission Date"
+                                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-md text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                        </div>
 
-                            <div class="w-full px-2.5">
-                                <div class="h-11 w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 !text-md text-gray-600 shadow-theme-xs">
-                                    <span class="text-gray-500">Days Pending: </span>
-                                    <span id="days-pending-display" class="font-medium">Will be calculated automatically</span>
-                                </div>
-                            </div>
-
-                            <div class="w-full px-2.5 flex justify-end space-x-2">
-                                <button type="button" id="cancel-task"
-                                    class="px-4 py-2 !text-md font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200">Cancel</button>
-                                <button type="submit"
-                                    class="px-4 py-2 !text-md font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">Save</button>
+                        <div class="w-full px-2.5">
+                            <div
+                                class="h-11 w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 !text-md text-gray-600 shadow-theme-xs">
+                                <span class="text-gray-500">Days Pending: </span>
+                                <span id="days-pending-display" class="font-medium">Will be calculated
+                                    automatically</span>
                             </div>
                         </div>
-                    </form>
-                </div>
+
+                        <div class="w-full px-2.5 flex justify-end space-x-2">
+                            <button type="button" id="cancel-task"
+                                class="px-4 py-2 !text-md font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200">Cancel</button>
+                            <button type="submit"
+                                class="px-4 py-2 !text-md font-medium text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">Save</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+    </div>
 
     <!-- Lifecycle Update Modal -->
-    <div id="lifecycle-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div id="lifecycle-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[9999]">
         <div
             class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
             <div class="rounded-2xl border border-gray-200 bg-white">
                 <div class="px-5 py-4 sm:px-6 sm:py-5">
                     <div class="flex items-center justify-between">
-                        <h3 class="!text-2xl font-medium text-gray-800">Task Status Update</h3>
+                        <h3 class="!!text-2xl font-medium text-gray-800">Task Status Update</h3>
                         <button id="close-lifecycle-modal" class="text-gray-400 hover:text-gray-500">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -922,13 +925,13 @@
 
     <!-- Lifecycle History Modal -->
     <div id="lifecycle-history-modal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[9999]">
         <div
             class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl max-h-[80vh] overflow-y-auto">
             <div class="rounded-2xl border border-gray-200 bg-white">
                 <div class="px-5 py-4 sm:px-6 sm:py-5">
                     <div class="flex items-center justify-between">
-                        <h3 class="!text-2xl font-medium text-gray-800">Task Lifecycle History</h3>
+                        <h3 class="!!text-2xl font-medium text-gray-800">Task Lifecycle History</h3>
                         <button id="close-history-modal" class="text-gray-400 hover:text-gray-500">
                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -966,7 +969,7 @@
         // Update notification function to handle error type - moved to top for availability
         function showNotification(title, message, type = 'notification') {
             let container = document.getElementById('notificationsContainer');
-            
+
             // If container doesn't exist, create it
             if (!container) {
                 container = document.createElement('div');
@@ -974,7 +977,7 @@
                 container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-md';
                 document.body.appendChild(container);
             }
-            
+
             const notification = document.createElement('div');
 
             const bgColor = type === 'error'
@@ -1327,7 +1330,7 @@
         async function initializeUserManagement() {
             try {
                 console.log('Initializing user management...');
-                
+
                 // Fetch team members and current user in parallel
                 const [members, user] = await Promise.all([
                     fetchTeamMembers(),
@@ -1342,7 +1345,7 @@
 
                 // Find current user in team members to get permissions
                 const userProfile = teamMembers.find(member => member.username === currentUser.username);
-                
+
                 if (userProfile) {
                     userPermissions = {
                         canDelete: userProfile.admin,
@@ -1363,7 +1366,7 @@
 
                 // Update UI based on permissions
                 updateUIBasedOnPermissions();
-                
+
                 // Populate form dropdowns
                 populateUserDropdowns();
 
@@ -1378,7 +1381,7 @@
         // Function to update UI based on user permissions
         function updateUIBasedOnPermissions() {
             console.log('Updating UI based on permissions:', userPermissions);
-            
+
             // Hide/show delete buttons based on admin permissions
             const deleteButtons = document.querySelectorAll('[onclick*="deleteTask"]');
             deleteButtons.forEach(button => {
@@ -1406,18 +1409,18 @@
 
                 const indicator = document.createElement('div');
                 indicator.id = 'user-permission-indicator';
-                indicator.className = 'mt-2 flex items-center gap-2 text-sm text-gray-600';
-                
+                indicator.className = 'mt-2 flex items-center gap-2 !text-md text-gray-600';
+
                 const roleIcon = userPermissions.isAdmin ? '👑' : userPermissions.isMaker && userPermissions.isChecker ? '🛠️✅' : userPermissions.isMaker ? '🛠️' : userPermissions.isChecker ? '✅' : '👤';
                 const roleText = userPermissions.isAdmin ? 'Admin' : userPermissions.isMaker && userPermissions.isChecker ? 'Maker & Checker' : userPermissions.isMaker ? 'Maker' : userPermissions.isChecker ? 'Checker' : 'User';
-                
+
                 indicator.innerHTML = `
                     <span class="flex items-center gap-1">
                         <span>${roleIcon}</span>
                         <span>Logged in as: <strong>${currentUser.displayName}</strong> (${roleText})</span>
                     </span>
                 `;
-                
+
                 headerElement.parentNode.insertBefore(indicator, headerElement.nextSibling);
             }
         }
@@ -1425,11 +1428,11 @@
         // Function to populate user dropdowns based on roles
         function populateUserDropdowns() {
             console.log('Populating user dropdowns...');
-            
+
             // Get makers for task-assigned-user
             const makers = teamMembers.filter(member => member.maker);
             console.log('Makers found:', makers.length);
-            
+
             // Get checkers for task-submitted-by
             const checkers = teamMembers.filter(member => member.checker);
             console.log('Checkers found:', checkers.length);
@@ -1795,10 +1798,19 @@
                         const newColumn = evt.to.id.replace('-column', '');
                         const oldColumn = evt.from.id.replace('-column', '');
 
+                        console.log('Sortable onEnd triggered:', {
+                            taskId,
+                            oldColumn,
+                            newColumn,
+                            hasChanged: newColumn !== oldColumn
+                        });
+
                         // Only show lifecycle modal if task actually moved to a different column
                         if (newColumn !== oldColumn) {
+                            console.log('Column change detected, calling showLifecycleModal');
                             showLifecycleModal(taskId, oldColumn, newColumn, taskElement);
                         } else {
+                            console.log('No column change, just updating counters');
                             updateTaskCounters();
                         }
                     }
@@ -2461,7 +2473,7 @@
                         if (task.column === 'done') return false; // Skip completed tasks
 
                         const submissionDate = new Date(task.submissionDate || task.createdAt || Date.now());
-                        
+
                         // Task is overdue if it's older than 30 days
                         return submissionDate < thirtyDaysAgo;
                     }).sort((a, b) => {
@@ -2583,7 +2595,7 @@
             // Helper function to create task card HTML
             function createTaskCardHTML(task) {
                 // Calculate days pending
-                const daysPending = task.submissionDate ? 
+                const daysPending = task.submissionDate ?
                     Math.floor((new Date() - new Date(task.submissionDate)) / (1000 * 60 * 60 * 24)) : 0;
 
                 // Get days pending color
@@ -2630,36 +2642,38 @@
                     
                     <!-- Tags Section -->
                     <div class="flex flex-wrap gap-2 mb-3">
-                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded ${getTicketTypeBadgeClass(task.ticketType)}">
+                        <span class="inline-flex items-center px-2 py-1 !text-md font-medium rounded ${getTicketTypeBadgeClass(task.ticketType)}">
                             ${getTicketTypeDisplayName(task.ticketType)}
                         </span>
-                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded ${getPriorityBadgeClass(task.priority)}">
-                            Priority ${task.priority || 'N/A'}
+                        <span class="inline-flex items-center px-2 py-1 !text-md font-medium rounded ${getPriorityBadgeClass(task.priority)}">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a3 3 0 01-3-3V6z" clip-rule="evenodd"></path>
+                            </svg>
+                            ${getPriorityDisplayName(task.priority)}
                         </span>
-                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">
+                        <span class="inline-flex items-center px-2 py-1 !text-md font-medium rounded bg-purple-100 text-purple-700">
                             ${getTeamDisplayName(task.teamInCharge)}
                         </span>
                     </div>
                     
                     <!-- Description -->
-                    <p class="text-sm text-gray-600 mb-4 leading-5 line-clamp-3">${task.description || 'No description available'}</p>
+                    <p class="!text-md text-gray-600 mb-4 leading-5 line-clamp-3">${task.description || 'No description available'}</p>
 
-                    <!-- Bottom section with assigned user and days pending -->
-                    <div class="flex items-center justify-between">
-                        <!-- Assigned user badge -->
-                        <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                            ${task.assignedTo || 'Unassigned'}
-                        </div>
+                    <!-- Bottom section with assigned user on top and days pending below -->
+<div class="flex flex-col items-start space-y-1">
+    <!-- Assigned user badge -->
+    <div class="inline-flex items-center px-2 py-1 rounded-full !text-md font-medium bg-blue-100 text-blue-700">
+        ${task.assignedTo || 'Unassigned'}
+    </div>
 
-                        <!-- Days pending -->
-                        <div class="flex items-center text-xs ${getDaysPendingColor(daysPending)}">
-                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            ${daysPending} days pending
-                        </div>
-                    </div>
-                </div>
+    <!-- Days pending -->
+    <div class="flex items-center !text-md ${getDaysPendingColor(daysPending)}">
+        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        ${daysPending} days pending
+    </div>
+</div>
             `;
             }
 
@@ -2782,12 +2796,12 @@
                     tasks.forEach(task => {
                         const row = document.createElement('tr');
                         row.className = 'hover:bg-gray-50';
-                        
+
                         // Calculate days pending
                         const submissionDate = new Date(task.submissionDate || task.createdAt || Date.now());
                         const today = new Date();
                         const daysPending = Math.floor((today - submissionDate) / (1000 * 60 * 60 * 24));
-                        
+
                         row.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap !text-md font-medium text-gray-900">${task.ticketNumber || 'N/A'}</td>
                         <td class="px-6 py-4 !text-md text-gray-500" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${task.description || 'N/A'}</td>
@@ -3113,7 +3127,12 @@
             let pendingTaskMove = null; // Store pending move data
 
             function showLifecycleModal(taskId, fromStatus, toStatus, taskElement) {
-                const taskTitle = taskElement.querySelector('h3').textContent;
+                console.log('showLifecycleModal called:', { taskId, fromStatus, toStatus });
+                
+                // Get task title from ticket number instead
+                const ticketNumberElement = taskElement.querySelector('.text-lg.font-bold');
+                const taskTitle = ticketNumberElement ? ticketNumberElement.textContent : `Task ${taskId}`;
+                console.log('Task title found:', taskTitle);
 
                 // Store pending move data
                 pendingTaskMove = {
@@ -3130,6 +3149,12 @@
                 document.getElementById('lifecycle-from-status').textContent = getStatusDisplayName(fromStatus);
                 document.getElementById('lifecycle-to-status').textContent = getStatusDisplayName(toStatus);
 
+                console.log('Modal populated with:', {
+                    title: taskTitle,
+                    from: getStatusDisplayName(fromStatus),
+                    to: getStatusDisplayName(toStatus)
+                });
+
                 // Reset form
                 lifecycleForm.reset();
                 document.getElementById('lifecycle-task-id').value = taskId;
@@ -3137,6 +3162,7 @@
 
                 // Show modal
                 lifecycleModal.classList.remove('hidden');
+                console.log('Lifecycle modal should now be visible');
             }
 
             function hideLifecycleModal() {
@@ -3155,10 +3181,11 @@
 
             function getStatusDisplayName(status) {
                 const statusNames = {
-                    'todo': 'To Do',
+                    'unassigned': 'Unassigned',
+                    'submitted': 'Submitted',
                     'progress': 'In Progress',
-                    'review': 'Review',
-                    'done': 'Done'
+                    'done': 'Done',
+                    'tosubmit': 'To Submit'
                 };
                 return statusNames[status] || status;
             }
@@ -3616,7 +3643,7 @@
                 dayHeader.className = 'mb-6 pb-4 border-b border-gray-200';
 
                 const dayTitle = document.createElement('h3');
-                dayTitle.className = `text-2xl font-semibold text-gray-900 ${isToday ? 'text-blue-600' : ''
+                dayTitle.className = `!text-2xl font-semibold text-gray-900 ${isToday ? 'text-blue-600' : ''
                     }`;
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 dayTitle.textContent = date.toLocaleDateString('en-US', options);
@@ -3776,9 +3803,9 @@
             function formatDateTime(dateString) {
                 if (!dateString) return 'No date';
                 const date = new Date(dateString);
-                return date.toLocaleString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
+                return date.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
                     year: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
@@ -3798,8 +3825,8 @@
             // Day number at the top
             const dayNumber = document.createElement('div');
             dayNumber.className = `!text-md font-medium mb-2 flex items-center gap-1 ${isCurrentMonth
-                    ? (isToday ? 'text-blue-600 font-bold' : 'text-gray-900')
-                    : 'text-gray-400'
+                ? (isToday ? 'text-blue-600 font-bold' : 'text-gray-900')
+                : 'text-gray-400'
                 }`;
 
             if (isToday) {
