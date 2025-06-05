@@ -1218,6 +1218,10 @@
                 } catch (localStorageError) {
                     console.warn('Error reading from localStorage:', localStorageError);
                 }
+
+                // If no fallback data available, return empty array to prevent undefined errors
+                console.log('No fallback data available, returning empty array.');
+                return [];
             }
         }
 
@@ -1652,10 +1656,10 @@
                                 taskCard.className = 'task-card';
                                 taskCard.dataset.id = task.id;
                                 taskCard.dataset.priority = task.priority;
-                                taskCard.dataset.assignedUser = task.assignedUser;
-                                taskCard.dataset.submittedBy = task.submittedBy;
-                                taskCard.dataset.startDate = task.startDate;
-                                taskCard.dataset.dueDate = task.dueDate;
+                                taskCard.dataset.assignedTo = task.assignedTo;
+                                taskCard.dataset.assignedBy = task.assignedBy;
+                                taskCard.dataset.submissionDate = task.submissionDate;
+                                taskCard.dataset.ticketType = task.ticketType;
                                 taskCard.innerHTML = createTaskCardHTML(task);
                                 column.appendChild(taskCard);
                             }
@@ -1741,18 +1745,18 @@
             function applySearchFilter() {
                 // Search in Kanban view
                 document.querySelectorAll('.task-card').forEach(card => {
-                    const title = card.querySelector('h3').textContent.toLowerCase();
-                    const description = card.querySelector('p').textContent.toLowerCase();
-                    const tag = card.querySelector('span').textContent.toLowerCase();
-                    const priority = card.dataset.priority.toLowerCase();
-                    const assignedUser = (card.dataset.assignedUser || '').toLowerCase();
+                    const ticketNumber = card.querySelector('.text-lg.font-bold')?.textContent.toLowerCase() || '';
+                    const description = card.querySelector('p')?.textContent.toLowerCase() || '';
+                    const badges = Array.from(card.querySelectorAll('.inline-flex span')).map(span => span.textContent.toLowerCase()).join(' ');
+                    const priority = card.dataset.priority?.toLowerCase() || '';
+                    const assignedTo = (card.dataset.assignedTo || '').toLowerCase();
 
                     const matches = !currentSearchTerm ||
-                        title.includes(currentSearchTerm) ||
+                        ticketNumber.includes(currentSearchTerm) ||
                         description.includes(currentSearchTerm) ||
-                        tag.includes(currentSearchTerm) ||
+                        badges.includes(currentSearchTerm) ||
                         priority.includes(currentSearchTerm) ||
-                        assignedUser.includes(currentSearchTerm);
+                        assignedTo.includes(currentSearchTerm);
 
                     card.style.display = matches ? 'block' : 'none';
                 });
@@ -2578,72 +2582,15 @@
 
             // Helper function to create task card HTML
             function createTaskCardHTML(task) {
-                // Get ticket type icon
-                const getTicketTypeIcon = (ticketType) => {
-                    switch (ticketType) {
-                        case 'jira':
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 16a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        case 'red': // Bug
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        case 'purple': // Design
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        case 'green': // Enhancement
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        case 'yellow': // Ad Hoc
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        default:
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
-                        </svg>`;
-                    }
-                };
+                // Calculate days pending
+                const daysPending = task.submissionDate ? 
+                    Math.floor((new Date() - new Date(task.submissionDate)) / (1000 * 60 * 60 * 24)) : 0;
 
-                // Get priority icon
-                const getPriorityIcon = (priority) => {
-                    switch (priority) {
-                        case 'urgent':
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        case 'high':
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        case 'medium':
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        case 'low':
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
-                        </svg>`;
-                        default:
-                            return `<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
-                        </svg>`;
-                    }
-                };
-
-                // Get priority color
-                const getPriorityColor = (priority) => {
-                    const priorityColors = {
-                        'urgent': 'bg-red-100 text-red-700',
-                        'high': 'bg-orange-100 text-orange-700',
-                        'medium': 'bg-yellow-100 text-yellow-700',
-                        'low': 'bg-green-100 text-green-700',
-                        'none': 'bg-gray-100 text-gray-700'
-                    };
-                    return priorityColors[priority] || 'bg-gray-100 text-gray-700';
+                // Get days pending color
+                const getDaysPendingColor = (days) => {
+                    if (days >= 30) return 'text-red-600 font-semibold';
+                    if (days >= 14) return 'text-orange-600 font-medium';
+                    return 'text-gray-600';
                 };
 
                 return `
@@ -2652,18 +2599,11 @@
                      oncontextmenu="showTaskMenu(event, '${task.id}')" 
                      onclick="showTaskDetails('${task.id}')">
                     
-                    <!-- Header with tags and action buttons -->
+                    <!-- Header with ticket number and action buttons -->
                     <div class="flex items-start justify-between mb-3">
-                        <!-- Tags Section -->
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2 py-1 !text-md font-medium rounded ${tagColor}">
-                                ${getTagIcon(task.tag)}
-                                ${getTagName(task.tag)}
-                            </span>
-                            <span class="inline-flex items-center px-2 py-1 !text-md font-medium rounded ${getPriorityColor(task.priority)}">
-                                ${getPriorityIcon(task.priority)}
-                                ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                            </span>
+                        <!-- Ticket Number -->
+                        <div class="text-lg font-bold text-blue-600">
+                            ${task.ticketNumber || 'N/A'}
                         </div>
                         
                         <!-- Action buttons -->
@@ -2688,25 +2628,35 @@
                         </div>
                     </div>
                     
-                    <!-- Task Title -->
-                    <h3 class="!text-2xl font-semibold text-gray-900 mb-2 leading-6">${task.title}</h3>
+                    <!-- Tags Section -->
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded ${getTicketTypeBadgeClass(task.ticketType)}">
+                            ${getTicketTypeDisplayName(task.ticketType)}
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded ${getPriorityBadgeClass(task.priority)}">
+                            Priority ${task.priority || 'N/A'}
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">
+                            ${getTeamDisplayName(task.teamInCharge)}
+                        </span>
+                    </div>
                     
                     <!-- Description -->
-                    <p class="!text-md text-gray-600 mb-4 leading-5">${(task.description || 'No description available').split('.')[0] + (task.description && task.description.includes('.') ? '.' : '')}</p>
+                    <p class="text-sm text-gray-600 mb-4 leading-5 line-clamp-3">${task.description || 'No description available'}</p>
 
-                    <!-- Bottom section with user badge and due date -->
+                    <!-- Bottom section with assigned user and days pending -->
                     <div class="flex items-center justify-between">
                         <!-- Assigned user badge -->
-                        <div class="inline-flex items-center px-2 py-1 rounded-full !text-md font-medium bg-blue-100 text-blue-700">
-                            ${task.assignedUser || 'Unassigned'}
+                        <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            ${task.assignedTo || 'Unassigned'}
                         </div>
 
-                        <!-- Due date with clock icon -->
-                        <div class="flex items-center !text-md text-gray-500">
+                        <!-- Days pending -->
+                        <div class="flex items-center text-xs ${getDaysPendingColor(daysPending)}">
                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            ${getDaysUntilDeadline(task.dueDate)}
+                            ${daysPending} days pending
                         </div>
                     </div>
                 </div>
