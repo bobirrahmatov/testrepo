@@ -1,41 +1,51 @@
-Sub QueryWebsiteAndExtractData()
-    Dim bot As New Selenium.ChromeDriver
-    Dim ws As Worksheet
-    Dim i As Long
-    Dim inputValue As String
-    Dim resultText As String
-    
-    Set ws = ThisWorkbook.Sheets("Sheet1") ' change to your sheet name
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from openpyxl import load_workbook
+import time
 
-    ' Start browser
-    bot.Start "Chrome"
-    bot.Get "https://your-target-website.com" ' Replace with actual website
+# Load Excel file
+wb = load_workbook("your_file.xlsx")  # Replace with your filename
+ws = wb.active  # Or specify: wb["Sheet1"]
 
-    i = 2 ' Start from row 2
-    Do While ws.Cells(i, 1).Value <> ""
-        inputValue = ws.Cells(i, 1).Value
-        
-        ' Find the input box and enter the value
-        On Error Resume Next
-        bot.FindElementByName("cwrelid").Clear
-        bot.FindElementByName("cwrelid").SendKeys inputValue
-        
-        ' Click the button
-        bot.FindElementByName("but_rltnshop").Click
-        bot.Wait 2000 ' Wait for results to load (adjust if needed)
+# Set up Selenium Chrome driver
+driver = webdriver.Chrome()
+driver.get("https://your-target-website.com")  # Replace with actual URL
 
-        ' Extract data from the result cell
-        resultText = ""
-        On Error Resume Next
-        resultText = bot.FindElementByCss("td.bodytextnormal").Text
-        On Error GoTo 0
-        
-        ' Write to Column B
-        ws.Cells(i, 2).Value = resultText
-        
-        i = i + 1
-    Loop
+row = 2
+while True:
+    input_value = ws[f"A{row}"].value
+    if not input_value:
+        break
 
-    MsgBox "Done extracting data!"
-    bot.Quit
-End Sub
+    try:
+        # Clear and input data into field
+        input_box = driver.find_element(By.NAME, "cwrelid")
+        input_box.clear()
+        input_box.send_keys(str(input_value))
+
+        # Click the button
+        button = driver.find_element(By.NAME, "but_rltnshop")
+        button.click()
+
+        time.sleep(2)  # Wait for results to load; adjust as needed
+
+        # Extract result
+        try:
+            result = driver.find_element(By.CSS_SELECTOR, "td.bodytextnormal").text
+        except:
+            result = "Not found"
+
+        ws[f"B{row}"] = result
+        print(f"Row {row}: {input_value} -> {result}")
+
+    except Exception as e:
+        print(f"Error on row {row}: {e}")
+        ws[f"B{row}"] = "Error"
+
+    row += 1
+
+# Save updated Excel file
+wb.save("output_results.xlsx")
+driver.quit()
+print("Finished!")
