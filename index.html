@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Maker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DevExtreme CSS -->
+    <link rel='stylesheet' href='https://cdn3.devexpress.com/jslib/21.1.5/css/dx.common.css'>
+    <link rel='stylesheet' href='https://cdn3.devexpress.com/jslib/21.1.5/css/dx.light.css'>
+    <link rel='stylesheet' href='https://cdn3.devexpress.com/jslib/21.1.5/css/dx-diagram.css'>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        /* Custom scrollbar styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="p-4">
+        <div class="rounded-2xl border border-gray-200 bg-white">
+            <div class="px-5 py-4 sm:px-6 sm:py-5">
+                <h3 class="text-base font-medium text-gray-800">
+                    Chart Maker
+                </h3>
+            </div>
+            <div class="border-t border-gray-100 p-5 sm:p-6">
+                <!-- Chart Container -->
+                <div class="dx-viewport demo-container">
+                    <div id="diagram" class="w-full h-[600px] rounded-lg border border-gray-200"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'></script>
+    <script src='https://cdn3.devexpress.com/jslib/21.1.5/js/dx-diagram.min.js'></script>
+    <script src='https://cdn3.devexpress.com/jslib/21.1.5/js/dx.all.js'></script>
+    <script src="./script.js"></script>
+</body>
+</html>
